@@ -1,5 +1,5 @@
 create table input (i text not null);
-\copy from 'input.txt'
+\copy input from 'input.txt'
 with
     digit_matches as (
         select
@@ -12,7 +12,7 @@ with
                     'g'
                 ) x(r)
             ) digit_match
-        from inputb
+        from input
     ),
     digits(num, s) as (
         select num, str
