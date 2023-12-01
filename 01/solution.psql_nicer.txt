@@ -1,0 +1,40 @@
+create table input (i text not null);
+\copy from 'input.txt'
+with
+    digit_matches as (
+        select
+            i,
+            array(
+                select r[1]
+                from regexp_matches(
+                    i,
+                    '([0-9]|on(?=e)|tw(?=o)|thre(?=e)|four|fiv(?=e)|six|seve(?=n)|eigh(?=t)|nin(?=e))',
+                    'g'
+                ) x(r)
+            ) digit_match
+        from inputb
+    ),
+    digits(num, s) as (
+        select num, str
+        from
+            (values
+                (1, 'on'),
+                (2, 'tw'),
+                (3, 'thre'),
+                (4, 'four'),
+                (5, 'fiv'),
+                (6, 'six'),
+                (7, 'seve'),
+                (8, 'eigh'),
+                (9, 'nin')
+            ) as nums (num, str)
+    union
+        select i, i::text
+        from generate_series(1, 9) as x(i)
+    )
+select sum(first_digit_match.num * 10 + last_digit_match.num)
+from
+         digit_matches
+    join items first_digit_match on first_digit_match.str = digit_match[1]
+    join items last_digit_match on last_digit_match.str = digit_match[array_length(digit_match, 1)]
+;
