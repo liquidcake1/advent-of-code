@@ -1,0 +1,3 @@
+create table input (i text not null);
+\copy from 'input.txt'
+with fls as (select i, array(select r[1] from regexp_matches(i, '([0-9]|on(?=e)|tw(?=o)|thre(?=e)|four|fiv(?=e)|six|seve(?=n)|eigh(?=t)|nin(?=e))', 'g') x(r)) fl from inputb), items (num, s) as (select num, s from (values (1, 'on'), (2, 'tw'), (3, 'thre'), (4, 'four'), (5, 'fiv'), (6, 'six'), (7, 'seve'), (8, 'eigh'), (9, 'nin')) as nums (num, s) union select i, i::text from generate_series(1, 9) as x(i)) select sum(if.num*10+il.num) from fls join items if on if.s = fl[1] join items il on il.s = coalesce(fl[array_length(fl,1)], fl[1]);

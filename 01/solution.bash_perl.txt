@@ -1,0 +1,1 @@
+perl -ne 'chomp; @x=/([0-9]|on(?=e)|tw(?=o)|thre(?=e)|four|fiv(?=e)|six|seve(?=n)|eigh(?=t)|nin(?=e))/g; %ys=(on=>1,tw=>2,thre=>3,four=>4,fiv=>5,six=>6,seve=>7,eigh=>8,nin=>9);$ys{$_}=$_ for (1..9); $x = $ys{$x[0]} * 10 + $ys{$x[$#x]}; $t += $x; END{print "$t\n"}' input.txt
