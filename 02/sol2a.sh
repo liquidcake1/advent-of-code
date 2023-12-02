@@ -215,6 +215,10 @@ LxlKx
   [Stack has bad elements after test] z 2 !=Q lKx
   [; Possible? ]n lyn
   [; Sum: ]n lXn
+  1;C 2;C 3;C * *
+  [; Power: ]n dn
+  lY+dsY
+  [; Power sum: ]nn
   10an
   [Stack has bad elements at end of game] z 2 !=Q lKx
   100 !<M
