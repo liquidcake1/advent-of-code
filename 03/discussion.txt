@@ -1,0 +1,42 @@
+This code is really ugly. I didn't know APL before today and the only array
+programming I'd done was with numpy/list comprehensions and a bit of Haskell.
+
+There's probably a lot of awful types and structure that could be improved; I
+spent around 9 hours on this and a lot of that was just trying to figure out
+how to get around unhelpful "RANK ERROR" and "LENGTH ERROR" messages.
+Eventually I figured out that ↑ would turn a matrix of matrices into a higher
+rank matrix. I think something clicked in me at this point and I started
+actually making much more progress. Code still has many artefacts of the
+learning process though, as I was really taking a long time and just wanted to
+finish.
+
+Problem 1
+=========
+
+My basic approach is to start by creating a matrix of full part numbers by
+"left combining" the digits repeatedly. This results in a matrix which is
+mostly 0, but has part numbers in positions where part numbers start. I then
+create a second matrix, which is an indicator matrix for symbol locations. I
+"grow" this up and down, then left and right, then finally create three
+versions, `h1` through `h3`, each "grown" more one more left than the previous.
+I filter my part numbers by digit count to make `d1` through `d3`, dot product
+all of these and then sum all values in the result.
+
+Problem 2
+=========
+
+I had to invert my approach, here. I started by generating the part number `d1`
+through `d3`, but also created an indicator matrix for locations containing a
+part number digit. I did a "grow" operation as above to find the an adjacency
+count matrix (note there's a complication on the left-right growth -- I have to
+avoid summing a part with itself). Taking the intersection of the
+gear-symbol-indicator-matrix with the cells equal to 2 in this new matrix got
+me the set of "real gears".
+
+I now did a second "grow" operation on part numbers, this time taking multiples
+in all cells where they overlapped. I intersected this with the "real gears"
+indicator matrix, then flattened and summed.
+
+There's probably a bunch of duplication here -- the "gear ratio" matrix and the
+"part number adjacency matrix" are pretty similar to generate, so I could
+likely have re-used one to simplify generating the other. It works, though!
