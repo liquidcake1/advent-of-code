@@ -22,6 +22,8 @@ versions, `h1` through `h3`, each "grown" more one more left than the previous.
 I filter my part numbers by digit count to make `d1` through `d3`, dot product
 all of these and then sum all values in the result.
 
+I did this using https://tryapl.org/#
+
 Problem 2
 =========
 
@@ -40,3 +42,7 @@ indicator matrix, then flattened and summed.
 There's probably a bunch of duplication here -- the "gear ratio" matrix and the
 "part number adjacency matrix" are pretty similar to generate, so I could
 likely have re-used one to simplify generating the other. It works, though!
+
+The solution exceeded the workspace size on tryapl, so I used a local
+`dyalogscript` to run this. I couldn't figure out how to use the `dyalog` REPL
+directly; it kept giving me syntax errors when I pasted long lines.
