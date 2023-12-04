@@ -1,0 +1,80 @@
+I wrote this in Befunge93.
+
+Mostly tested with https://esolangpark.vercel.app/ide/befunge93
+
+For the live runs, I used https://github.com/catseye/Befunge-93
+
+The solution isn't well factored (in particular, the "read integer" loop is
+copy/pasted with only small changes), and has a lot of vestigial stuff lying
+around.
+
+The second problem revealed an incompatibility of the online interpreter with
+what I assume is the spec: The online version allows arbitrary integers in
+every cell, while the reference interpreter uses chars, and overflows without
+error. The Wikipedia description talks about ASCII values, so I think this is
+the intention. Not wanting to implement my own bigint library as well, I simply
+patched the interpreter. I hope I can be forgiven.
+
+Patch was:
+
+```diff
+diff --git a/src/bef.c b/src/bef.c
+index 0f006e8..75b19c5 100644
+--- a/src/bef.c
++++ b/src/bef.c
+@@ -207,7 +207,7 @@ struct stack                    /* stack structure, for values on stack */
+ 
+ /*************************************************** GLOBAL VARIABLES */
+ 
+-char pg[LINEWIDTH * PAGEHEIGHT]; /* befunge 'page' of source */
++long pg[LINEWIDTH * PAGEHEIGHT]; /* befunge 'page' of source */
+ int x = 0, y = 0;                /* x and y of the PC */
+ int dx = 1, dy = 0;              /* direction of the PC */
+ int debug = 0;                   /* flag : display ANSI debugging? */
+@@ -282,7 +282,8 @@ int main (argc, argv)
+     printf ("Befunge-93 Interpreter/Debugger v2.25\n");
+   }
+ 
+-  memset(pg, ' ', LINEWIDTH * PAGEHEIGHT);
++  for(i=0; i< LINEWIDTH * PAGEHEIGHT; i++)
++         pg[i] = ' ';
+ 
+   strcpy(filename, argv[argc - 1]);
+   if (strchr(filename, '.') == NULL)
+@@ -410,7 +411,7 @@ int main (argc, argv)
+       {
+         if (isprint((int)cur))
+         {
+-          printf("%c", cur);
++          printf("%ld", cur);
+         }
+       }
+       printf("\n");
+@@ -468,7 +469,7 @@ int main (argc, argv)
+     }
+     if (stringmode && (cur != '"'))
+       push (cur);
+-      else if (isdigit ((int)cur))
++      else if (isdigit ((char)cur))
+         push (cur - '0');
+       else
+         switch (cur)
+@@ -806,7 +807,7 @@ int main (argc, argv)
+ #else
+                  printf ("%c[%d;%dH", 27, (int)(y+1), (int)(x+1));
+ #endif /* CONSOLE */
+-                 if (isprint ((int)cur)) printf ("%c", cur); else printf(".");
++                 if (isprint ((int)cur)) printf ("%ld", cur); else printf(".");
+                }
+              }
+              break;
+@@ -815,7 +816,7 @@ int main (argc, argv)
+            default:
+              if ((!debug) && (!ignore_unsupported) && (!quiet))
+              {
+-               fprintf(stderr, "Unsupported instruction '%c' (0x%02x) (maybe not Befunge-93?)\n", cur, cur);
++               fprintf(stderr, "Unsupported instruction '%ld' (0x%08lx) (maybe not Befunge-93?)\n", cur, (unsigned long)cur);
+              }
+              break;
+         }
+```
