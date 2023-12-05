@@ -1,3 +1,4 @@
+#!/usr/bin/jq -CRscf
 [
 	. as $in|
 	split("\n\n")[0]|
