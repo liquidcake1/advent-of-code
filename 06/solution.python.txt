@@ -1,0 +1,11 @@
+I first did this using Python, essentially using it as a desktop calculator, along with the following notes I made in a scratch text file:
+
+distance = hold * (limit - hold) > record
+limit * hold - hold ** 2 - record = 0
+hold = (-limit + sqrt(limit ** 2 - 4 * -1 * -record)) / -2
+
+Ans = floor(sqrt(limit ** 2 - 4 * record) / 2) * 2 + 1
+
+I needed to fiddle a bit with rounding to get it right.
+
+lambda limit, record: math.ceil((limit + (limit ** 2 - 4 * record) ** 0.5) / 2) - math.floor((limit - (limit ** 2 - 4 * record) ** 0.5) / 2) - 1
