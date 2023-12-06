@@ -1,0 +1,28 @@
+# Postgres
+# dc
+# APL / Q / ??? some sort of array thing.
+# Befunge / Rail
+# jq
+# GAP
+LOGO
+Forth
+Elixir
+Rust
+PowerShell
+PROLOG
+Ruby
+vimscript
+Parrot?
+Haskell
+JavaScript
+Raku?
+BASIC (Liberty?)
+R
+ELISP / Clojure / Scheme
+Bash
+Java
+Perl
+Python3
+Erlang
+C
+C++
