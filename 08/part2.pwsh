@@ -1,0 +1,30 @@
+$i = Get-ChildItem input8.txt | Select-String -Pattern "^([RL]+)$|^([A-Z]+) = \(([A-Z]+), ([A-Z]+)\)$" | ForEach-Object { $x = @{paths=@{}} } { $m=$_.Matches[0]; if ($m.Groups[1].Success) { $x["dirs"]=$m.Groups[1].Value } elseif ($m.Groups[2].Success) { $x["paths"][$m.Groups[2].Value] = @{L=$m.Groups[3].Value; R=$m.Groups[4].Value} } } { $x }
+$starts = $i.paths.Keys | Where-Object { $_.Chars(2) -eq "A" }
+function euclideanAlgorithm($originalA, $originalB) {
+    $a = [Math]::Abs($originalA)
+    $b = [Math]::Abs($originalB)
+
+    if ($a -eq 0 -and $b -eq 0) {
+        return $null
+    }
+
+    if ($a -eq 0 -and $b -ne 0) {
+        return $b
+    }
+
+    if ($a -ne 0 -and $b -eq 0) {
+        return $a
+    }
+
+    # Normally we need to do subtraction ($a - $b) but to prevent
+    # recursion occurs too often we may shorten subtraction to ($a % $b).
+    # Since ($a % $b) normally means that we've subtracted $b from a
+    # many times until the difference became less than a.
+
+    if ($a -gt $b) {
+        return euclideanAlgorithm ($a % $b) $b
+    }
+
+    return euclideanAlgorithm ($b % $a) $a
+}
+$starts | ForEach-Object { $result = 1 } { $x = $_; $steps = 0; $ends = New-Object Collections.Generic.List[int]; $loop = $null; while($x -ne $loop) { if ($x.Chars(2) -eq "Z") { if ($loop -eq $null) { $loop = $x } $ends.Add($steps); } $x = $i["paths"][$x][$i["dirs"][$steps % $i["dirs"].Length].ToString()]; $steps += 1; } $ends.Add($steps); $result = $ends[0] * $result / (euclideanAlgorithm $ends[0] $result); $result } { $result }
