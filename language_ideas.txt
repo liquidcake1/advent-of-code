@@ -4,11 +4,13 @@
 # Befunge / Rail
 # jq
 # GAP
+# Bash
+# PowerShell
 LOGO
+CMAKE
 Forth
 Elixir
 Rust
-PowerShell
 PROLOG
 Ruby
 vimscript
@@ -19,7 +21,6 @@ Raku?
 BASIC (Liberty?)
 R
 ELISP / Clojure / Scheme
-Bash
 Java
 Perl
 Python3
