@@ -1,0 +1,48 @@
+$i = Get-ChildItem input8.txt |
+	Select-String -Pattern "^([RL]+)$|^([A-Z]+) = \(([A-Z]+), ([A-Z]+)\)$" |
+	ForEach-Object {
+		$x = @{paths=@{}}
+	} {
+		$m=$_.Matches[0]
+		if ($m.Groups[1].Success) {
+			$x["dirs"]=$m.Groups[1].Value
+		} elseif ($m.Groups[2].Success) {
+			$x["paths"][$m.Groups[2].Value] = @{L=$m.Groups[3].Value; R=$m.Groups[4].Value}
+		}
+	} {
+		$x
+	}
+$starts = $i.paths.Keys | Where-Object { $_.Chars(2) -eq "A" }
+function lcm($a, $b) {
+	$mul = $a * $b
+	if($a > $b) {
+		($a, $b) = ($b, $a)
+	}
+	while($a -gt 0) {
+		($a, $b) = (($b % $a), $a)
+	}
+	$mul / $b
+}
+$starts | ForEach-Object {
+	$result = 1
+} {
+	$x = $_
+	$steps = 0
+	$ends = New-Object Collections.Generic.List[int]
+	$loop = $null
+	while($x -ne $loop) {
+		if ($x.Chars(2) -eq "Z") {
+			if ($loop -eq $null) {
+				$loop = $x
+			}
+			$ends.Add($steps)
+		}
+		$x = $i["paths"][$x][$i["dirs"][$steps % $i["dirs"].Length].ToString()]
+		$steps += 1
+	}
+	$ends.Add($steps)
+	$result = lcm $ends[0] $result
+	$result
+} {
+	$result
+}

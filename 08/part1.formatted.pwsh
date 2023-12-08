@@ -1,0 +1,21 @@
+$i = Get-ChildItem input8.txt | 
+	Select-String -Pattern "^([RL]+)$|^([A-Z]+) = \(([A-Z]+), ([A-Z]+)\)$" |
+	ForEach-Object {
+		$x = @{}
+	} {
+		$m=$_.Matches[0];
+		if ($m.Groups[1].Success) {
+			$x["dirs"]=$m.Groups[1].Value
+		} elseif ($m.Groups[2].Success) {
+			$x[$m.Groups[2].Value] = @{L=$m.Groups[3].Value; R=$m.Groups[4].Value}
+		}
+	} {
+		$x
+	}
+$x="AAA"
+$steps = 0
+while($x -ne "ZZZ") {
+	$x = $i[$x][$i["dirs"][$steps % $i["dirs"].Length].ToString()]
+	$steps += 1
+}
+$steps
