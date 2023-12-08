@@ -1,5 +1,7 @@
 $i = Get-ChildItem input8.txt | Select-String -Pattern "^([RL]+)$|^([A-Z]+) = \(([A-Z]+), ([A-Z]+)\)$" | ForEach-Object { $x = @{paths=@{}} } { $m=$_.Matches[0]; if ($m.Groups[1].Success) { $x["dirs"]=$m.Groups[1].Value } elseif ($m.Groups[2].Success) { $x["paths"][$m.Groups[2].Value] = @{L=$m.Groups[3].Value; R=$m.Groups[4].Value} } } { $x }
 $starts = $i.paths.Keys | Where-Object { $_.Chars(2) -eq "A" }
+# https://github.com/dfinke/powershell-algorithms/blob/master/src/algorithms/math/euclidean-algorithm/euclideanAlgorithm.ps1
+# Found on a Google for 'lcm PowerShell'. Was hoping there'd be some kind of math library or something...
 function euclideanAlgorithm($originalA, $originalB) {
     $a = [Math]::Abs($originalA)
     $b = [Math]::Abs($originalB)
