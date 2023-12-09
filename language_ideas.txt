@@ -1,14 +1,15 @@
-# Postgres
-# dc
-# APL / Q / ??? some sort of array thing.
-# Befunge / Rail
-# jq
-# GAP
-# Bash
-# PowerShell
+# Day 1: Postgres
+# Day 2: dc
+# Day 3: APL (dyalog)
+# Day 4: Befunge
+# Day 5: jq
+# Day 6: GAP
+# Day 7: Bash
+# Day 8: PowerShell
+# Day 9: Forth (gforth)
+
 LOGO
 CMAKE
-Forth
 Elixir
 Rust
 PROLOG
@@ -27,3 +28,8 @@ Python3
 Erlang
 C
 C++
+
+Others:
+
+Q / ??? some sort of array thing. (APL done)
+Rail (Befunge done)
