@@ -4,6 +4,8 @@ variable stack-size 1000 stack-size !
 create n-buf stack-size @ 2 * cell * allot ( create a buf of stack-size double ints )
 variable #depth ( create a single cell var of depth )
 stack-size @ #depth !
+create pre-predict 2 cell * allot
+create pre-predict2 2 cell * allot
 : init-stack
 	( .\" \ninit-stack\n" )
 	#depth @ n-buf
@@ -51,16 +53,30 @@ stack-size @ #depth !
 		2over nip
 		2@    ( stack dl ptr val2 old2 )
 		2over 2swap d-  ( stack dl ptr val2 diff2 )
+		.\" \npre-check  " .s .\" \n"
+		5 pick dup . 0 = if
+			2dup
+			#depth @ 1 and 0 = dup .
+			if
+				dnegate
+			endif
+			.\" \npredict stack " .s ." predict "
+			pre-predict 2@ d+ 2dup d. pre-predict 2!
+			.\" \n"
+		endif
+		.\" \npost-check " .s .\" \n"
 		2swap 2rot 2tuck nip ( stack diff2 dl ptr val2 dl ptr )
 		2!
 		2 cell * + swap 1 - swap
 		over 1 + 0 =
 	until
+	print-stack
 	2drop 2drop
 	( .\" \nend add-to-stack" .s .\" \n" )
 ;
 : read-numbers 
 	.\" \nread-numbers" .s .\" \n"
+	0 0 pre-predict 2!
 	begin
 		over c@ 45 - 0 =
 		if
@@ -90,6 +106,7 @@ stack-size @ #depth !
 ;
 : run-all
 	0 0
+	0 0 pre-predict2 2!
 	begin
 		init-stack .s
 		line-buf buf-size @ stdin read-line ( get a line of input -- length flag error ) .s
@@ -104,6 +121,8 @@ stack-size @ #depth !
 		.\" \nNext number is: " 2dup d. .\" \n"
 		d+
 		.\" \nRunning total is: " 2dup d. .\" \n"
+		.\" \nPrev number is: " pre-predict 2@ d. .\" \n"
+		.\" \nRunning total prev number is: " pre-predict 2@ pre-predict2 2@ d+ 2dup d. pre-predict2 2! .\" \n"
 	repeat
 ;
 run-all
