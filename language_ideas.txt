@@ -1,13 +1,44 @@
-# Day 1: Postgres
-# Day 2: dc
-# Day 3: APL (dyalog)
-# Day 4: Befunge
-# Day 5: jq
-# Day 6: GAP
-# Day 7: Bash
-# Day 8: PowerShell
-# Day 9: Forth (gforth)
-# Day 10: Prolog (swi-prolog)
+# Day 1: Postgres 00:11:38 / 00:30:35
+#   On AoC clock; this was likely real times
+# Day 2: dc 04:47:34 / 00:06:09
+#   On AoC clock; I think this was continuous from 5am, though I spent
+    10 minutes getting out of bed during this.
+# Day 3: APL (dyalog) 05:45:00 / 01:35:00
+#   AoC 08:41:01 / 10:14:45; woke late and only got APL working ater
+#   7am. I linked tryapl at 07:57 (+2:57) so I'm taking a bit before
+#   that as a starting point.. I listed "a bit under 9 hours" as solve
+#   time.
+# Day 4: Befunge 03:40:00 / 02:05:00
+#   AoC 03:54:49 / 08:01:58; this includes some time getting up, plus
+#   building a local interpreter. The second part included around 2
+#   hours of work meetings plus some work in addition; I think I
+#   solved it in an additional 1-2 hours at lunch.
+# Day 5: jq 01:27:27 / 01:10:21
+#   AoC 01:27:27 / 02:47:48; I think I got out of bed after part 1 so
+#   subtracted an extra 10 mins.
+# Day 6: GAP 03:00:00 approx
+#   AoC 00:25:12 / 00:26:00. This was Python. The GAP stuff took 3
+#   hours more, including figuring out how to run code in it.
+# Day 7: Bash 01:30:00 / 00:44:41
+#   AoC 15:31:09 / 16:15:50; I didn't start until later on. I think I
+#   started at 18:58, about 14 hours late. Used that as start time. A
+#   lot of time was spent debugging regular expressions.
+# Day 8: PowerShell 02:00:00 / 01:10:00
+#   AoC 05:03:05 / 15:20:43; started 2h late on part 1 and did a 1h
+#   bike ride plus shower during it so about 2h. Second part took
+#   about 01:10 on top.
+# Day 9: Forth (gforth) 04:50:00 / 02:14:00
+#   AoC 08:39:15 / 12:22:57; continuous for part 1, but started 02:37
+#   late, and had breakfast delaying starting until 03:48, so 04:50 or
+#   so. 11:08 late starting second part, so 02:14 for this.
+# Day 10: Prolog (swi-prolog) 02:10:00 / 03:12:00
+#   AoC 05:26:38 / 11:32:40; started looking for an interpreter at
+#   08:08, installed swi-prolog at 08:20 -- so, call it 2 hours. Did a
+#   lot of thinking about approach for part 2 while riding bike,
+#   started implementation at 13:20 or so (08:20), so about 03:12 for
+#   second part. I could have done better if I just went for the
+#   inefficient approach, but I got really tied up in logic errors
+#   until I finally got out my whiteboard.
 
 LOGO
 CMAKE
