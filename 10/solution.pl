@@ -8,15 +8,14 @@ init(Filename, Lines, X, Y) :-
     write(X), nl,
     write(Y), nl.
 
-part1(Filename) :-
+solution(Filename) :-
     init(Filename, Lines, X, Y),
 	write('part1'), nl,
     explore('S', '', X, Y, '+', 0, 0, Lines, L, A),
     Sol is L / 2,
-    write(Sol), nl,
-    Sol2 is abs(A) - L,
-    write("Big area is "), write(abs(A)), nl,
-    write("Sol2 is "), write(Sol2), nl,
+    write("Sol 1 is "), write(Sol), nl,
+    Sol2 is abs(A),
+    write("Sol 2 is "), write(Sol2), nl,
     nl
     .
 
