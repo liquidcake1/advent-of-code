@@ -1,7 +1,7 @@
 Algorithm for Part 2
 ====================
 
-See [Discussion 1](discussion.txt) for background.
+See [Discussion 1](discussion.md) for background.
 
 Assume we go around clockwise. Then any "clockwise" turn is concave
 and any "anticlockwise" turn is convex. `LD` and `DR` turns mark right

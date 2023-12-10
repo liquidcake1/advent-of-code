@@ -33,5 +33,5 @@ A `0` means "ignore this co-ordinate", as does anything else.
 For example, on the second diagram row `H` has nothing internal. and
 row `D` has `-(0+1) + 3 -(12+1) + 15 = 3-1 + 15-13 = 4` inside points.
 
-See [Discussion 2](discussion2.txt) for algorithm, which is more
+See [Discussion 2](discussion2.md) for algorithm, which is more
 spoilery.
