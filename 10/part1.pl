@@ -11,7 +11,8 @@ init(Filename, Lines, X, Y) :-
 part1(Filename) :-
     init(Filename, Lines, X, Y),
     explore('S', X, Y, 0, Lines, L),
-    write(L), nl
+    Sol is L / 2,
+    write(Sol), nl
     .
 
 find_s([Line|Lines], I, X, Y) :-
