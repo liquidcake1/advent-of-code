@@ -4,15 +4,13 @@ import Data.List
 main = do solution "input11.txt"
 
 solution filename = do
-    fh <- openFile filename ReadMode
-    input <- hGetContents fh
-    print $ solve input expand
+    solution1 filename expand
+    solution1 filename expand2
 
--- Why error when I try "solution filename expfn" and replace expand2 with expfn?
-solution2 filename = do
+solution1 filename expfn = do
     fh <- openFile filename ReadMode
     input <- hGetContents fh
-    print $ solve input expand2
+    print $ solve input expfn
 
 solve input expfn = let
     ilines = lines input
