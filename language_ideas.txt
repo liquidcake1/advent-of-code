@@ -39,6 +39,10 @@
 #   second part. I could have done better if I just went for the
 #   inefficient approach, but I got really tied up in logic errors
 #   until I finally got out my whiteboard.
+# Day 11: Haskell 02:04:00 / 00:06:10
+#   07:04:40 / 07:10:50; Start time 07:54 (10 mins thinking at 6am).
+#   finished 12:11 (second part). Blocks of 1h6, (45m off), 35m, (77m off),
+#   10m, (7m off), 8m.
 
 LOGO
 CMAKE
@@ -47,7 +51,6 @@ Rust
 Ruby
 vimscript
 Parrot?
-Haskell
 JavaScript
 Raku?
 BASIC (Liberty?)
