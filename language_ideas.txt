@@ -59,7 +59,7 @@ R
 ELISP / Clojure / Scheme
 Java
 Perl
-Python3
+(Python3)
 Erlang
 C
 C++
