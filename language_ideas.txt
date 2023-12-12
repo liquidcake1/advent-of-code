@@ -43,8 +43,12 @@
 #   07:04:40 / 07:10:50; Start time 07:54 (10 mins thinking at 6am).
 #   finished 12:11 (second part). Blocks of 1h6, (45m off), 35m, (77m off),
 #   10m, (7m off), 8m.
-# Day 12: Elixir 00:55:27
-#   03:22:53 AoC; Elixir installed 07:27:26 (02:27:26)
+# Day 12: Elixir 00:55:27 / 00:42:00
+#   03:22:53 / 09:07:32 AoC; Elixir installed 07:27:26 (02:27:26). Did second
+#   part after lunch. Actually got an answer to part 2 at 26 minutes, but my
+#   code didn't include the "join with `?`" part of the spec, which caused me
+#   to have to debug it for 15 minutes before rereading the spec and noticing
+#   my error.
 
 LOGO
 CMAKE
