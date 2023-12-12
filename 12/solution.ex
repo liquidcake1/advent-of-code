@@ -1,4 +1,3 @@
-# functions are defined inside Modules
 defmodule Sol do
 
   # basic defintion
