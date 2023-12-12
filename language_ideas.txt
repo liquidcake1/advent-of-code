@@ -43,10 +43,11 @@
 #   07:04:40 / 07:10:50; Start time 07:54 (10 mins thinking at 6am).
 #   finished 12:11 (second part). Blocks of 1h6, (45m off), 35m, (77m off),
 #   10m, (7m off), 8m.
+# Day 12: Elixir 00:55:27
+#   03:22:53 AoC; Elixir installed 07:27:26 (02:27:26)
 
 LOGO
 CMAKE
-Elixir
 Rust
 Ruby
 vimscript
