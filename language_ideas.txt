@@ -49,6 +49,11 @@
 #   code didn't include the "join with `?`" part of the spec, which caused me
 #   to have to debug it for 15 minutes before rereading the spec and noticing
 #   my error.
+# Day 13: Perl 00:56:22 / 00:18:52
+#   00:56:22 / 01:15:14 AoC; numbers. Woke up early for this one, so wasted
+#   little time. Except by trying to use regular expressions to solve it. That
+#   wasted some time with debugging. Second part took a bit of thinking but
+#   worked first time.
 
 LOGO
 CMAKE
@@ -62,7 +67,6 @@ BASIC (Liberty?)
 R
 ELISP / Clojure / Scheme
 Java
-Perl
 (Python3)
 Erlang
 C
