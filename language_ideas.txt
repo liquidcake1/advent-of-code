@@ -56,6 +56,13 @@
 #   time.
 # Day 14: C 00:27:00 / 01:04:00
 #   02:09:28 / 03:12:16 AoC; pretty much continuous from 06:42 (01:42).
+# Day 15: Bywater BASIC 01:15:18 / 01:22:22
+#   02:32:58 / 03:45:20 AoC; started at 06:17:40 (01:17:40). Spent 10 minutes
+#   faffing with "Brandy", which claims to be a BBC BASIC interpreter but
+#   actually just corrupted my terminal. Had a 10-15 minute debug incident
+#   where I copy/pasted the last-but-one total and wondered why it was wrong.
+#   Also, Bywater BASIC doesn't support strings longer than 5000 characters
+#   (it'll segfault).
 
 LOGO
 CMAKE
@@ -65,7 +72,6 @@ vimscript
 Parrot?
 JavaScript
 Raku?
-BASIC (Liberty?)
 R
 ELISP / Clojure / Scheme
 Java
