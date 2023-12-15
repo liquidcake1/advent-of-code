@@ -1,4 +1,5 @@
-REM OPEN "inputtest2.txt" FOR INPUT AS #2
+REM Use: (echo 'OPEN "input15.txt" FOR INPUT AS #2'; echo 'load "solution.bas"'; echo run) | bwbasic
+REM OPEN "inputtest.txt" FOR INPUT AS #2
 DIM lengths(256, 1000)
 DIM labels$(256, 1000)
 LET a$ = ""
