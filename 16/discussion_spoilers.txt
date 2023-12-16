@@ -1,0 +1,7 @@
+I believe there's a better way, but I couldn't get to the bottom of the semantics of it.
+
+* When exploring, mark any (cell, direction) with the depth of the exploration when first hit. When backtracking, write down the final grid state on top of this (cell, direction), minus any cells hit only _before_ it.
+* In future exploration, when a cell cached above is hit, simply overlay the saved grid onto the current grid and backtrack.
+* In theory, each (location, direction) pair gets visited exactly once. However, when visiting a pair for the first time, the full cache has to be saved. So there's W*H*4*W*H*4 writes. My current algorithm does (W+H+W+H)*W*H writes at most, so should be faster.
+
+Maybe QLogo is just slow.
