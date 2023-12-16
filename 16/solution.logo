@@ -15,53 +15,90 @@ MAKE "STARTUP [
 	PRINT POP "lines
 	MAKE "lines REVERSE :lines
 	PRINT :lines
-	MAKE "seen MDARRAY (SE COUNT :lines COUNT ITEM 1 :lines)
-	MAKE "dir [0 1]
-	MAKE "queue [[[1 1] [1 0]]]
-	DO.WHILE [
-		MAKE "item DEQUEUE "queue
-		MAKE "pos ITEM 1 :item
-		MAKE "x ITEM 1 :pos
-		MAKE "y ITEM 2 :pos
-		MAKE "dir ITEM 2 :item
+	MAKE "outs []
+	MAKE "max 0
+	MAKE "starts []
+	MAKE "dirs [[1 0] [-1 0] [0 1] [0 -1]]
+	FOR [i 1 4] [
+		MAKE "dir ITEM :i :dirs
 		MAKE "xd ITEM 1 :dir
 		MAKE "yd ITEM 2 :dir
-		MAKE "dbit LSHIFT 1 (:xd + 1) + (:yd + 1) * 3
-		MAKE "splitter IFELSE [EQUAL? :xd 0] ["-] ["\|]
-		MAKE "looping EQUAL? 0 0
-		PRINT (SE "startloop :x :y :xd :yd)
-		WHILE [IFELSE [(AND
-				:looping
-				GREATER? :x 0
-				GREATER? :y 0
-				LESSEQUAL? :x COUNT ITEM 1 :lines
-				LESSEQUAL? :y COUNT :lines
-			)]
-			[PRINT (SE "test\ seen MDITEM (SE :y :x) :seen "dbit :dbit) EQUAL? 0 BITAND :dbit MDITEM (SE :y :x) :seen] [EQUAL? 0 1]
+		IFELSE [EQUAL? :yd 0] [
+			MAKE "x SUM 1 PRODUCT QUOTIENT DIFFERENCE 1 :xd 2 DIFFERENCE COUNT ITEM 1 :lines 1
+			(PRINT :x :xd :yd (LIST "y 1 COUNT :lines))
+			FOR (LIST "y 1 COUNT :lines) [PUSH "starts (LIST (LIST :x :y) (LIST :xd :yd))]
+			(PRINT "done)
 		] [
-			MDSETITEM (SE :y :x) :seen BITOR :dbit MDITEM (SE :y :x) :seen
-			MAKE "char MDITEM SE :y :x :lines
-			(PRINT "INLOOP :x :y :char :splitter MDITEM (SE :y :x) :seen)
-			IF EQUAL? :char :splitter [
-				QUEUE "queue LIST LIST :x - :yd :y - :xd LIST 0 - :yd 0 - :xd
-				QUEUE "queue LIST LIST :x + :yd :y + :xd LIST :yd :xd
-				MAKE "looping EQUAL? 1 0
-			]
-			IF EQUAL? :char "\\ [
-				QUEUE "queue LIST LIST :x + :yd :y + :xd LIST :yd :xd
-				MAKE "looping EQUAL? 1 0
-			]
-			IF EQUAL? :char "/ [
-				QUEUE "queue LIST LIST :x - :yd :y - :xd LIST 0 - :yd 0 - :xd
-				MAKE "looping EQUAL? 1 0
-			]
-			IF :looping [
-				MAKE "x :x + :xd
-				MAKE "y :y + :yd
-				(PRINT "next :x :y)
-			]
+			MAKE "y SUM 1 PRODUCT QUOTIENT DIFFERENCE 1 :yd 2 DIFFERENCE COUNT :lines 1
+			(PRINT :y :xd :yd (LIST "x 1 COUNT ITEM 1 :lines))
+			FOR (LIST "x 1 COUNT ITEM 1 :lines) [PUSH "starts (LIST (LIST :x :y) (LIST :xd :yd))]
+			(PRINT "done)
 		]
-		PRINT (LIST "queue\ after\ loop :queue)
-	] [NOT EQUAL? COUNT :queue 0]
-	PRINT REDUCE "+ MAP [COUNT FILTER [NOTEQUAL? ? []] ARRAYTOLIST ?] ARRAYTOLIST :seen
+	]
+	PRINT :starts
+		MAKE "seen MDARRAY [120 120]
+	WHILE [NOTEQUAL? 0 COUNT :starts] [
+		(PRINT "startouterloop)
+		PRINT (LIST COUNT :lines COUNT ITEM 1 :lines)
+		MAKE "dims (LIST COUNT :lines COUNT ITEM 1 :lines)
+		PRINT :dims
+		FOR (LIST "x 1 COUNT ITEM 1 :lines) [FOR (LIST "y 1 COUNT :lines) [MDSETITEM (LIST :x :y) :seen []] MAKE "junk 1]
+		PRINT :dims
+		MAKE "item POP "starts
+			
+		MAKE "queue (LIST :item)
+		PRINT (SE "startloop :item)
+		DO.WHILE [
+			MAKE "item DEQUEUE "queue
+			MAKE "pos ITEM 1 :item
+			MAKE "x ITEM 1 :pos
+			MAKE "y ITEM 2 :pos
+			MAKE "dir ITEM 2 :item
+			MAKE "xd ITEM 1 :dir
+			MAKE "yd ITEM 2 :dir
+			MAKE "dbit LSHIFT 1 (:xd + 1) + (:yd + 1) * 3
+			MAKE "splitter IFELSE [EQUAL? :xd 0] ["-] ["\|]
+			MAKE "looping EQUAL? 0 0
+			; PRINT (SE "startloop :x :y :xd :yd)
+			WHILE [IFELSE [(AND
+					:looping
+					GREATER? :x 0
+					GREATER? :y 0
+					LESSEQUAL? :x COUNT ITEM 1 :lines
+					LESSEQUAL? :y COUNT :lines
+				)]
+				[
+					;PRINT (SE "test\ seen MDITEM (SE :y :x) :seen "dbit :dbit)
+					 EQUAL? 0 BITAND :dbit MDITEM (SE :y :x) :seen
+				] [EQUAL? 0 1]
+			] [
+				MDSETITEM (SE :y :x) :seen BITOR :dbit MDITEM (SE :y :x) :seen
+				MAKE "char MDITEM SE :y :x :lines
+				;(PRINT "INLOOP :x :y :char :splitter MDITEM (SE :y :x) :seen)
+				IF EQUAL? :char :splitter [
+					QUEUE "queue LIST LIST :x - :yd :y - :xd LIST 0 - :yd 0 - :xd
+					QUEUE "queue LIST LIST :x + :yd :y + :xd LIST :yd :xd
+					MAKE "looping EQUAL? 1 0
+				]
+				IF EQUAL? :char "\\ [
+					QUEUE "queue LIST LIST :x + :yd :y + :xd LIST :yd :xd
+					MAKE "looping EQUAL? 1 0
+				]
+				IF EQUAL? :char "/ [
+					QUEUE "queue LIST LIST :x - :yd :y - :xd LIST 0 - :yd 0 - :xd
+					MAKE "looping EQUAL? 1 0
+				]
+				IF :looping [
+					MAKE "x :x + :xd
+					MAKE "y :y + :yd
+					;(PRINT "next :x :y)
+				]
+			]
+			;PRINT (LIST "queue\ after\ loop :queue)
+		] [NOT EQUAL? COUNT :queue 0]
+		MAKE "scount REDUCE "+ MAP [COUNT FILTER [NOTEQUAL? ? []] ARRAYTOLIST ?] ARRAYTOLIST :seen
+		MAKE "max IFELSE [GREATER? :scount :max] [:scount] [:max]
+		PRINT :max
+		PRINT :outs
+	]
 ]
