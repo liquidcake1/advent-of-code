@@ -2,7 +2,7 @@
 #   On AoC clock; this was likely real times
 # Day 2: dc 04:47:34 / 00:06:09
 #   On AoC clock; I think this was continuous from 5am, though I spent
-    10 minutes getting out of bed during this.
+#   10 minutes getting out of bed during this.
 # Day 3: APL (dyalog) 05:45:00 / 01:35:00
 #   AoC 08:41:01 / 10:14:45; woke late and only got APL working ater
 #   7am. I linked tryapl at 07:57 (+2:57) so I'm taking a bit before
@@ -63,21 +63,31 @@
 #   where I copy/pasted the last-but-one total and wondered why it was wrong.
 #   Also, Bywater BASIC doesn't support strings longer than 5000 characters
 #   (it'll segfault).
+# Day 16: QLogo 02:53:58 / 02:19:27
+#   03:56:43 / 06:16:10 AoC; started at 06:02:45 (01:02:45). Took me 10 minutes
+#   to get a working interpreter and a lot more to work through the horrible
+#   IO. Ah well, it's another evil language down.
+# Day 17: vimscript 01:21:39 / 00:25:51 (00:30:00)
+#   03:16:39 / 03:41:30 AoC (03:46:39 to fix an off-by-one error I literally
+#   coded in). I woke up about 06:18 and had read problem by 06:29. Began
+#   getting out of bed at 06:33, was online at 06:58, picked vimscript 07:00 or
+#   so, and apparently had figured out "readfile" and "echo" by 07:05. Let's
+#   say I started at 06:55 (01:55:00). No breaks for solve.
 
-LOGO
+R
 CMAKE
+Parrot?
+
 Rust
 Ruby
-vimscript
-Parrot?
 JavaScript
 Raku?
-R
 ELISP / Clojure / Scheme
 Java
 (Python3)
 Erlang
 C++
+
 
 Others:
 
