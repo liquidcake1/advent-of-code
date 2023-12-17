@@ -10,7 +10,7 @@ rm -rf q
 mkdir q
 echo 0 0 0 >> q/0
 echo 0 0 1 >> q/0
-declare -A shortests
+declare -a shortests
 for y in $(seq 0 $((lc - 1))); do
 	for x in $(seq 0 $((lc - 1))); do
 		shortests[$((y * lc * 2 + x * 2))]=1000
