@@ -1,5 +1,5 @@
 let lines = readfile("input17.txt")
-echo lines
+"echo lines
 " x, y, lastdir (0=x, 1=y)
 let qpos = -1
 let queue = {0: [[0, 0, 1], [0, 0, 0]]}
@@ -17,6 +17,12 @@ while y < len(lines)
 endwhile
 let shortests[0][0][0] = 0
 let shortests[0][0][1] = 0
+"part 1
+let minmove = 1
+let maxmove = 3
+"part 2
+let minmove = 4
+let maxmove = 10
 while len(queue) > 0
 	let qpos += 1
 	if has_key(queue, qpos)
@@ -41,7 +47,13 @@ while len(queue) > 0
 				"echo "Repeat!!"
 				break
 			endif
-			for cnt in [1, 2, 3]
+			let cnt = 0
+			if nx + ny == 0
+				" Thought I needed this; I was wrong!
+				"let cnt = 1
+			endif
+			while cnt < maxmove
+				let cnt = cnt + 1
 				let nx += dird[0] * dirm
 				let ny += dird[1] * dirm
 				if nx < 0 || ny < 0 || ny >= len(lines) || nx >= len(lines[ny]) 
@@ -49,6 +61,11 @@ while len(queue) > 0
 					break
 				endif
 				let newscore += lines[ny][nx]
+				if cnt < minmove
+					"echo "too short" nx ny
+					continue
+				endif
+				"echo "consider" nx ny nxt[2] dird newscore
 				let oldscore = shortests[ny][nx][1 - nxt[2]]
 				if oldscore > newscore
 					"echo "queue" [nx, ny, 1 - nxt[2]] "=" newscore "was" oldscore
@@ -58,7 +75,7 @@ while len(queue) > 0
 					endif
 					call add(queue[newscore], [nx, ny, 1 - nxt[2]])
 				endif
-			endfor
+			endwhile
 		endfor
 	endwhile
 	call remove(queue, qpos)
