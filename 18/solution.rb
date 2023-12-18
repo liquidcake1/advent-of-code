@@ -1,3 +1,5 @@
+# Pass filename, then optionally 'part2' for the second part.
+# Solution basically just re-implemented from Day 10.
 lines = File.readlines(ARGV[0], chomp: true)
 pos = [0, 0]
 puts pos.to_s
@@ -7,10 +9,18 @@ require 'set'
 clockwise = Set["UR", "RD", "DL", "LU"]
 pm_map = {"UR" => -1, "RD" => 1, "DL" => 1, "LU" => -1, "UL" => 0, "LD" => 0, "DR" => 0, "RU" => 0}
 area = 0
+area2 = 0
+pos2 = [0, 0]
 lines.each do |line|
   puts line
   dir, len_s, col_s = line.split(' ')
-  len = len_s.to_i
+  if ARGV[1] == "part2"
+    len = col_s[2..-3].to_i(16)
+    dir = "RDLU"[col_s[-2].to_i]
+  else
+    len = len_s.to_i
+  end
+  puts [dir, len].to_s
   dirv = dirs[dir]
 
   corner = lastdir + dir
