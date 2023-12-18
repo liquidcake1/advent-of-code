@@ -73,13 +73,15 @@
 #   getting out of bed at 06:33, was online at 06:58, picked vimscript 07:00 or
 #   so, and apparently had figured out "readfile" and "echo" by 07:05. Let's
 #   say I started at 06:55 (01:55:00). No breaks for solve.
+# Day 18: Ruby 00:47:10 / 00:07:30
+#   02:04:57 / 02:12:27 AoC. 06:17:47 started checking problem 06:19:54 picked
+#   language. Let's take the first time, which is 01:17:47 off the clock.
 
 R
 CMAKE
 Parrot?
 
 Rust
-Ruby
 JavaScript
 Raku?
 ELISP / Clojure / Scheme
