@@ -1,10 +1,12 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <queue>
 #include <csignal>
 #include <map>
 
 using namespace std;
+char names[4] = {'x', 'm', 'a', 's'};
 
 char parse_prop(char c) {
 	switch(c) {
@@ -17,6 +19,50 @@ char parse_prop(char c) {
 			raise(SIGTERM);
 	}
 	return -1;
+}
+class PartRange {
+	public:
+		int lows[4];
+		int highs[4];
+		string at;
+		PartRange(int inlows[4], int inhighs[4], string inat) {
+			for(int i=0; i<4; i++) {
+				lows[i] = inlows[i];
+				highs[i] = inhighs[i];
+			}
+			at = inat;
+		}
+		PartRange(const PartRange &pr) {
+			for(int i=0; i<4; i++) {
+				lows[i] = pr.lows[i];
+				highs[i] = pr.highs[i];
+			}
+			at = pr.at;
+		}
+		void out(ostream& os) const {
+			os << at << ":";
+			char sep = '{';
+			for(int i=0; i<4; i++) {
+				os << sep << lows[i] << "<=" << names[i] << "<=" << highs[i];
+				sep = ',';
+			}
+			os << '}';
+		}
+		long long count() const {
+			long long ans = 1;
+			for(int i=0; i<4; i++) {
+				if (lows[i] <= highs[i]) {
+					ans *= highs[i] - lows[i] + 1;
+				} else {
+					return 0;
+				}
+			}
+			return ans;
+		}
+};
+std::ostream & operator<<(std::ostream & os, const PartRange &pr) {
+	pr.out(os);
+	return os;
 }
 class Part {
 	public:
@@ -71,7 +117,7 @@ class Rule {
 		}
 		void out(std::ostream& os) const {
 			if (isop) {
-				os << var << (isgt ? ">" : "<") << val << ":" << dest;
+				os << names[var] << (isgt ? ">" : "<") << val << ":" << dest;
 			} else {
 				os << dest;
 			}
@@ -86,6 +132,45 @@ class Rule {
 				}
 			} else {
 				return true;
+			}
+		}
+		void split_out(PartRange &in, queue<PartRange> &out) {
+			if (isop) {
+				if (isgt) {
+					if (in.highs[var] > val) {
+						PartRange n(in);
+						in.highs[var] = val;
+						n.lows[var] = val + 1;
+						cout << "postsplit " << in << endl;
+						cout << "test queue " << n << " " << n.count() << endl;
+						if (n.count() > 0) {
+							cout << "queue " << n << endl;
+							n.at = dest;
+							out.push(n);
+						}
+					} else {
+						cout << "nomatch" << endl;
+					}
+				} else {
+					if (in.lows[var] < val) {
+						PartRange n(in);
+						in.lows[var] = val;
+						n.highs[var] = val - 1;
+						cout << "postsplit " << in << endl;
+						cout << "test queue " << n << " " << n.count() << endl;
+						if (n.count() > 0) {
+							cout << "queue " << n << endl;
+							n.at = dest;
+							out.push(n);
+						}
+					} else {
+						cout << "nomatch" << endl;
+					}
+				}
+			} else {
+				in.at = dest;
+				out.push(in);
+				in.lows[0] = in.highs[0] - 1;
 			}
 		}
 };
@@ -125,6 +210,17 @@ class Workflow {
 			raise(SIGTERM);
 			return "";
 		};
+		void split_out(PartRange pr, queue<PartRange> &out) {
+			for(auto rule: rules) {
+				cout << "Inspecting " << rule << endl;
+				if (pr.count() == 0) {
+					cout << "Nothing left" << endl;
+					return;
+				}
+				rule.split_out(pr, out);
+			}
+		}
+
 };
 std::ostream & operator<<(std::ostream & os, const Workflow &w) {
 	w.out(os);
@@ -140,6 +236,7 @@ int main (int argc, char **argv) {
 
 	}
 	int ans = 0;
+	// Part 1
 	while(getline(cin, s), s.length() > 0) {
 		Part p(s);
 		cout << "part " << s << endl;
@@ -156,5 +253,25 @@ int main (int argc, char **argv) {
 		}
 		cout << "Ans is " << ans << endl;
 	}
+	// Part 2
+	queue<PartRange> parts;
+	parts.push(PartRange(new int[4] {1, 1, 1, 1}, new int[4] {4000, 4000, 4000, 4000}, "in"));
+	long long ans2 = 0;
+	while(parts.size() > 0) {
+		PartRange pr = parts.front();
+		parts.pop();
+		cout << "Processing " << pr << endl;
+		if (pr.at == "A") {
+			ans2 += pr.count();
+			cout << "Ans2 is " << ans2 << endl;
+			continue;
+		} else if (pr.at == "R") {
+			continue;
+		}
+		workflows.at(pr.at).split_out(pr, parts);
+		cout << "Queue size is " << parts.size() << endl;
+	}
+	cout << "Part 1 is " << ans << endl;
+	cout << "Part 2 is " << ans2 << endl;
 }
 
