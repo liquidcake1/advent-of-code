@@ -6,82 +6,149 @@
 
 -record(counter, {low=0, high=0, cnts=#{}}).
 
-solution(Filename, X) ->
+parse(Filename) ->
     {ok,F} = file:read_file(Filename),
     Lines = lists:droplast(binary:split(F, <<$\n>>, [global])),
-    (catch ets:delete(state)),
-    State = ets:new(state, [{keypos, #module.name}, named_table]),
-    (catch ets:delete(state2)),
-    State2 = ets:new(state2, [{keypos, #module.name}, named_table]),
     Modules = lists:map(fun parse_line/1, Lines),
-    {_, Srcs} = lists:foldl(fun input_module/2, {State, #{}}, Modules),
-    init_conjs(ets:tab2list(State), Srcs, State),
-    #counter{low=L, high=H} = push_button_n(State, #counter{}, 1000),
-    Ans1 = {L, H, L * H},
-    io:format("===== PART 2~n"),
-    {_, Srcs} = lists:foldl(fun input_module/2, {State2, #{}}, Modules),
-    init_conjs(ets:tab2list(State2), Srcs, State2),
-    Ans2 = push_button_until_rx(State2, 1, X),
-    {Ans1, Ans2}.
+    Srcs = lists:foldl(fun init_srcs/2, #{}, Modules),
+    InitModules = [init_conjs(Module, Srcs) || Module <- Modules],
+    {
+        Srcs,
+        lists:foldl(
+            fun (Module=#module{name=Name}, Map) -> Map#{Name=>Module} end,
+            #{},
+            InitModules
+        )
+    }.
 
-push_button_until_rx(State, 10000, X) -> nope;
-push_button_until_rx(State, N, X) ->
-    #counter{cnts=RX} = push_button(State, #counter{}),
-    case RX of
-        0 ->
-            ok;
-        C ->
-            case lists:any(fun ({Na, V, _, _}) -> Na =:= X andalso V =:= low end, maps:get(X, C, [])) of
-                true ->
-                    io:format("Found: ~p ~p~n", [maps:find(X, C), N]);
-                false -> ok
-            end,
-            ok
+part1(Filename) ->
+    {_Srcs, Modules} = parse(Filename),
+    #counter{low=L, high=H} = push_button_n(Modules, #counter{}, 1000),
+    L*H.
+
+part2(Filename) ->
+    {Srcs, Modules} = parse(Filename),
+    TreeBreak = break_tree(Modules, Srcs, <<"rx">>, low),
+    solve_tree(TreeBreak).
+
+solve_tree({lcm, L}) ->
+    lists:foldl(fun (X, Y) -> lcm(solve_tree(X), Y) end, 1, L);
+solve_tree({compute, Name, Want, Modules}) ->
+    push_button_until(Modules, Name, Want).
+
+gcd(A,B) when A == 0; B == 0 -> 0;
+gcd(A,B) when A == B -> A;
+gcd(A,B) when A > B -> gcd(A-B, B);
+gcd(A,B) -> gcd(A, B-A).
+
+lcm(A,B) -> (A*B) div gcd(A, B).
+
+break_tree(Modules, Srcs, Name, WantPulse) ->
+    Type = case maps:find(Name, Modules) of
+        error ->
+            output;
+       {ok, #module{type = Type1}} ->
+            Type1
     end,
-    push_button_until_rx(State, N + 1, X).
+    case Type of
+        flipflip ->
+            {compute, Name, WantPulse};
+        _ ->
+            L = maps:get(Name, Srcs),
+            Ascendants = [{Src, parents([Src], Srcs, #{Src => init}) -- [<<"broadcaster">>]} || Src <- L],
+            NewWant = need_pulse(Type, WantPulse),
+            case lists:all(fun (X) -> X end, [X -- Y == X || {NX, X} <- Ascendants, {NY, Y} <- Ascendants, NX /= NY]) andalso lists:all(fun ({NX, X}) -> not lists:member(NX, X) end, Ascendants) of
+                true ->
+                    case [break_tree(filter(AscNames, Modules), Srcs, Src, NewWant) || {Src, AscNames} <- Ascendants] of
+                        [A] -> A;
+                        Other -> {lcm, Other}
+                    end;
+                false ->
+                    {compute, Name, WantPulse, Modules}
+            end
+    end.
 
-init_conjs([], _, _State) -> ok;
-init_conjs([#module{name=Name, type=conjunction}|Rest], Srcs, State) ->
-    ets:update_element(State, Name, {#module.state, maps:from_list([{X, low} || X <- maps:get(Name, Srcs)])}),
-    init_conjs(Rest, Srcs, State);
-init_conjs([_|Rest], Srcs, State) ->
-    init_conjs(Rest, Srcs, State).
+filter(L, Modules) ->
+    maps:filter(fun (Name, _) -> Name =:= <<"broadcaster">> orelse lists:member(Name, L) end, Modules).
+
+parents([N|Rest], Srcs, Seen) ->
+    case maps:find(N, Seen) of
+        error ->
+            parents(maps:get(N, Srcs, []) ++ Rest, Srcs, Seen#{N => 1});
+        {ok, init} ->
+            parents(maps:get(N, Srcs, []) ++ Rest, Srcs, maps:remove(N, Seen));
+        {ok, _} ->
+            parents(Rest, Srcs, Seen)
+    end;
+parents([], _Srcs, Seen) ->
+    maps:keys(Seen).
+
+need_pulse(conjunction, low) -> high;
+need_pulse(conjunction, high) -> low;
+need_pulse(output, Pulse) -> Pulse.
+
+
+push_button_until(State, N, X) ->
+    push_button_until(State, State, N, X, 1).
+push_button_until(_, _, _, _, 10000) -> nope;
+push_button_until(IState, State, Name, Want, Count) ->
+    {NewState, #counter{cnts=Cnts}} = push_button(State, #counter{}),
+    case lists:reverse(maps:get(Name, Cnts, [])) of
+        [Want|Rest] ->
+            [_] = lists:usort(Rest),
+            NewState = IState,
+            Count;
+        L ->
+            true = L =:= error orelse length(lists:usort(L)) < 2,
+            push_button_until(IState, NewState, Name, Want, Count + 1)
+    end.
+
+init_conjs(Module=#module{name=Name, type=conjunction}, Srcs) ->
+    Module#module{
+        state=maps:from_list([{X, low} || X <- maps:get(Name, Srcs)])
+    };
+init_conjs(Module, _Srcs) -> Module.
 
 push_button_n(_State, Counter, 0) -> Counter;
 push_button_n(State, Counter, X) ->
-    NewCounter = push_button(State, Counter),
-    %io:format("~n"),
-    push_button_n(State, NewCounter, X - 1).
+    {NewState, NewCounter} = push_button(State, Counter),
+    push_button_n(NewState, NewCounter, X - 1).
 
 push_button(State, Counter) ->
-    %io:format("Push button ~p~n", [Counter]),
     InitPulses = queue:from_list([{button, <<"broadcaster">>, low}]),
     process_pulses(InitPulses, State, Counter).
 
 process_pulses(Queue0, State, Counter) ->
     case queue:out(Queue0) of
         {{value, {Src, Dest, Pulse}}, Queue1} ->
-            %io:format("~s -~s-> ~s ~p~n", [Src, Pulse, Dest, Counter]),
-            case ets:lookup(State, Dest) of
-                [] -> NewQueue=Queue1;
-                [Module] ->
-                    {NewState, Out} = execute(Module, Src, Pulse),
-                    case NewState =:= Module#module.state of
-                        true -> ok;
-                        false -> ets:insert(State, Module#module{state=NewState})
+            case maps:find(Dest, State) of
+                error ->
+                    NewQueue = Queue1,
+                    NewState = State;
+                {ok, Module=#module{state=MState}} ->
+                    {NewMState, Out} = execute(Module, Src, Pulse),
+                    NewState = case NewMState =:= MState of
+                        true -> State;
+                        false -> State#{Dest => Module#module{state=NewMState}}
                     end,
                     NewQueue = lists:foldl(fun queue:in/2, Queue1, Out)
             end,
-            process_pulses(NewQueue, State, update_counter(Pulse, Dest, Counter));
+            NewCounter = update_counter(Pulse, Dest, Counter),
+            process_pulses(NewQueue, NewState, NewCounter);
         {empty, _} ->
-            Counter
+            {State, Counter}
     end.
 
 update_counter(Pulse, Dest, Counter) ->
-    update_counter1(Pulse, update_counter2(Pulse, Dest, Counter)).
-update_counter1(low, Counter) -> Counter#counter{low=Counter#counter.low + 1};
-update_counter1(high, Counter) -> Counter#counter{low=Counter#counter.high + 1}.
-update_counter2(V, Name, Counter) -> Counter#counter{cnts=(Counter#counter.cnts)#{Name => [{Name, V, Counter#counter.low, Counter#counter.high}|maps:get(Name, Counter#counter.cnts, [])]}}.
+    update_counter2(Pulse, Dest, update_counter1(Pulse, Counter)).
+
+update_counter1(low, Counter=#counter{low=Low}) ->
+    Counter#counter{low=Low+1};
+update_counter1(high, Counter=#counter{high=High}) ->
+    Counter#counter{high=High+1}.
+
+update_counter2(Pulse, Dest, Counter=#counter{cnts=Cnts}) ->
+    Counter#counter{cnts=maps:update_with(Dest, fun (L=[P|_]) when P =:= Pulse -> L; (L) -> [Pulse|L] end, [Pulse], Cnts)}.
 
 execute(Module, Src, InPulse) ->
     {NewState, Effect} = execute_(Module, Src, InPulse),
@@ -97,11 +164,9 @@ execute_(#module{type=flipflop, state=State}, _Src, high) ->
     {State, ignore};
 execute_(#module{type=flipflop, state=State}, _Src, low) ->
     NewState = flip(State),
-    %io:format("flipflip ~p~n", [NewState]),
     {NewState, flipflop_pulse(NewState)};
 execute_(#module{type=conjunction, state=State}, Src, Pulse) ->
     NewState = State#{Src => Pulse},
-    %io:format("conjunction ~p~n", [NewState]),
     {NewState, conjunction_pulse(NewState)}.
 
 flip(off) -> on;
@@ -116,12 +181,7 @@ conjunction_pulse(State) ->
         false -> high
     end.
 
-input_module(Module, {State, Srcs}) ->
-    ets:insert(State, Module),
-    NewSrcs = init_srcs(Srcs, Module),
-    {State, NewSrcs}.
-
-init_srcs(Srcs0, #module{name=N, dests=Ds}) ->
+init_srcs(#module{name=N, dests=Ds}, Srcs0) ->
     lists:foldl(fun (D, Srcs) -> maps:update_with(D, fun (X) -> [N|X] end, [N], Srcs) end, Srcs0, Ds).
 
 parse_line(<<"broadcaster -> ", L/binary>>) ->
