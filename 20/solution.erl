@@ -4,17 +4,41 @@
 
 -record(module, {name, type, dests, state}).
 
-solution(Filename) ->
+-record(counter, {low=0, high=0, cnts=#{}}).
+
+solution(Filename, X) ->
     {ok,F} = file:read_file(Filename),
     Lines = lists:droplast(binary:split(F, <<$\n>>, [global])),
     (catch ets:delete(state)),
     State = ets:new(state, [{keypos, #module.name}, named_table]),
+    (catch ets:delete(state2)),
+    State2 = ets:new(state2, [{keypos, #module.name}, named_table]),
     Modules = lists:map(fun parse_line/1, Lines),
     {_, Srcs} = lists:foldl(fun input_module/2, {State, #{}}, Modules),
     init_conjs(ets:tab2list(State), Srcs, State),
-    io:format("~p~n", [ets:tab2list(State)]),
-    {L, H} = push_button_n(State, {0, 0}, 1000),
-    {L, H, L * H}.
+    #counter{low=L, high=H} = push_button_n(State, #counter{}, 1000),
+    Ans1 = {L, H, L * H},
+    io:format("===== PART 2~n"),
+    {_, Srcs} = lists:foldl(fun input_module/2, {State2, #{}}, Modules),
+    init_conjs(ets:tab2list(State2), Srcs, State2),
+    Ans2 = push_button_until_rx(State2, 1, X),
+    {Ans1, Ans2}.
+
+push_button_until_rx(State, 10000, X) -> nope;
+push_button_until_rx(State, N, X) ->
+    #counter{cnts=RX} = push_button(State, #counter{}),
+    case RX of
+        0 ->
+            ok;
+        C ->
+            case lists:any(fun ({Na, V, _, _}) -> Na =:= X andalso V =:= low end, maps:get(X, C, [])) of
+                true ->
+                    io:format("Found: ~p ~p~n", [maps:find(X, C), N]);
+                false -> ok
+            end,
+            ok
+    end,
+    push_button_until_rx(State, N + 1, X).
 
 init_conjs([], _, _State) -> ok;
 init_conjs([#module{name=Name, type=conjunction}|Rest], Srcs, State) ->
@@ -26,19 +50,20 @@ init_conjs([_|Rest], Srcs, State) ->
 push_button_n(_State, Counter, 0) -> Counter;
 push_button_n(State, Counter, X) ->
     NewCounter = push_button(State, Counter),
-    io:format("~n"),
+    %io:format("~n"),
     push_button_n(State, NewCounter, X - 1).
 
 push_button(State, Counter) ->
+    %io:format("Push button ~p~n", [Counter]),
     InitPulses = queue:from_list([{button, <<"broadcaster">>, low}]),
     process_pulses(InitPulses, State, Counter).
 
 process_pulses(Queue0, State, Counter) ->
     case queue:out(Queue0) of
         {{value, {Src, Dest, Pulse}}, Queue1} ->
-            io:format("~s -~s-> ~s~n", [Src, Pulse, Dest]),
+            %io:format("~s -~s-> ~s ~p~n", [Src, Pulse, Dest, Counter]),
             case ets:lookup(State, Dest) of
-                [] -> NewQueue = Queue1;
+                [] -> NewQueue=Queue1;
                 [Module] ->
                     {NewState, Out} = execute(Module, Src, Pulse),
                     case NewState =:= Module#module.state of
@@ -47,13 +72,16 @@ process_pulses(Queue0, State, Counter) ->
                     end,
                     NewQueue = lists:foldl(fun queue:in/2, Queue1, Out)
             end,
-            process_pulses(NewQueue, State, update_counter(Pulse, Counter));
+            process_pulses(NewQueue, State, update_counter(Pulse, Dest, Counter));
         {empty, _} ->
             Counter
     end.
 
-update_counter(low, {L, H}) -> {L + 1, H};
-update_counter(high, {L, H}) -> {L, H + 1}.
+update_counter(Pulse, Dest, Counter) ->
+    update_counter1(Pulse, update_counter2(Pulse, Dest, Counter)).
+update_counter1(low, Counter) -> Counter#counter{low=Counter#counter.low + 1};
+update_counter1(high, Counter) -> Counter#counter{low=Counter#counter.high + 1}.
+update_counter2(V, Name, Counter) -> Counter#counter{cnts=(Counter#counter.cnts)#{Name => [{Name, V, Counter#counter.low, Counter#counter.high}|maps:get(Name, Counter#counter.cnts, [])]}}.
 
 execute(Module, Src, InPulse) ->
     {NewState, Effect} = execute_(Module, Src, InPulse),
@@ -69,11 +97,11 @@ execute_(#module{type=flipflop, state=State}, _Src, high) ->
     {State, ignore};
 execute_(#module{type=flipflop, state=State}, _Src, low) ->
     NewState = flip(State),
-    io:format("flipflip ~p~n", [NewState]),
+    %io:format("flipflip ~p~n", [NewState]),
     {NewState, flipflop_pulse(NewState)};
 execute_(#module{type=conjunction, state=State}, Src, Pulse) ->
     NewState = State#{Src => Pulse},
-    io:format("conjunction ~p~n", [NewState]),
+    %io:format("conjunction ~p~n", [NewState]),
     {NewState, conjunction_pulse(NewState)}.
 
 flip(off) -> on;
