@@ -7,6 +7,8 @@ lines.sort(key=lambda x: x[1][2])
 heights = [[0 for _ in range(max(x[1][0] for x in lines) + 1)] for _ in range(max(x[1][1] for x in lines) + 1)]
 highblocks = [[[] for _ in range(10)] for _ in range(10)]
 useful = set()
+supporters = [set() for _ in range(len(lines))]
+supporter_counts = [0 for _ in range(len(lines))]
 for i, (start, stop) in enumerate(lines):
     print(start, stop)
     print(heights)
@@ -29,8 +31,22 @@ for i, (start, stop) in enumerate(lines):
         hdelta = start[2] - minh
         start[2] -= hdelta
         stop[2] -= hdelta
+    support = list(support)
     if len(support) == 1:
         useful.update(support)
+    seen = set()
+    support_set = set()
+    if support:
+        support_set.update(supporters[support[0]])
+    for supporter in support:
+        support_set = support_set.intersection(supporters[supporter])
+        print(f"Support for {i} set to {support_set}")
+    if len(support) == 1:
+        support_set.update(support)
+    if support_set:
+        supporters[i] = support_set
+        for supporter in support_set:
+            supporter_counts[supporter] += 1
     curr = start.copy()
     for _ in range(l + 1):
         print(curr)
@@ -39,3 +55,6 @@ for i, (start, stop) in enumerate(lines):
         curr += step
     print(heights)
     print(len(lines) - len(useful))
+    print(sum(supporter_counts))
+print(supporter_counts)
+print(sum(supporter_counts))
