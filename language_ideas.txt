@@ -76,22 +76,40 @@
 # Day 18: Ruby 00:47:10 / 00:07:30
 #   02:04:57 / 02:12:27 AoC. 06:17:47 started checking problem 06:19:54 picked
 #   language. Let's take the first time, which is 01:17:47 off the clock.
+# Day 19: C++ 01:27:30 / 01:45:34
+#   02:38:30 / 03:24:04. Started 06:11, continuous.
+# Day 20: Erlang 01:24:51 / 04:00:00??
+#   03:10:43 / 12:29:16 AoC. Office day. Started 06:45:52 stopped part2
+#   09:07:49. Distractedly worked on during work, mostly after around 14:00,
+#   finished at work. Language not a major issue at all; used as a joker.
+# Day 21: Rust 01:30:00 / 04:00:00?
+#   06:08:14 / 18:27:04 AoC. Worked on distractedly on the train, around 09:16.
+#   Used only offline docs due to situation, which was a bit of a crippler. Had
+#   something that read input and found S by 09:53, which was also a train
+#   change. 10:30 restart and submitted 11:08. Part 2 was much more of a mare.
+#   Spent some time thinking during the day but started proper around 17:40.
+#   Lots of train changes etc., but probably a clean run again from about 21:00
+#   to 23:27. I spent a huge amount of time trying to nderstand why my code
+#   didn't compile, and very little time trying to work out why the algorithm
+#   was wrong. The offline docs are great.
+# Day 22: Elisp^WPython ??:??:?? / 00:48:32
+#   07:25:10 / 08:13:42 AoC. Started 06:07. Got something that at least read
+#   the input by about 08:00. I eventually gave up at 11:50 or so. Started,
+#   distractedly, in Python, around midday. I guess I _did_ use Python, after
+#   all.
+
+Probably a massive grind:
 
 R
 CMAKE
 Parrot?
-
-Rust
-JavaScript
-Raku?
-ELISP / Clojure / Scheme
-Java
-(Python3)
-Erlang
-C++
-
-
-Others:
-
+PostScript
 Q / ??? some sort of array thing. (APL done)
 Rail (Befunge done)
+
+Probably not that bad:
+
+JavaScript
+Raku?
+ELISP (tried and failed) / Clojure / Scheme
+Java
