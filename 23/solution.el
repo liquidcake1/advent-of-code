@@ -174,8 +174,7 @@
 		    ; TODO if there's a self-intersect 2 ahead, this logic can also filter valid-dirs
 		    (new-pos-dirs (seq-filter 'edge-reversal new-pos-dirs-))
 		    ; Filter any self-intersects.
-		    (valid-dirs- (seq-filter (lambda (pos-dir) (< (a2ref maxes (car pos-dir)) 0)) new-pos-dirs))
-		    (valid-dir (seq-filter (lambda (pos-dir) ((< (a2ref maxes (add-position (cadr pos-dir) (car pos-dir))) 0) (
+		    (valid-dirs (seq-filter (lambda (pos-dir) (< (a2ref maxes (car pos-dir)) 0)) new-pos-dirs))
 		    (new-queue-entries (mapcar (lambda (pos-dir) (list (car pos-dir) (+ 1 len) (cadr pos-dir))) valid-dirs)))
 	       ;DEBUG-DISABLE (print (list 'new-pos-dirs new-pos-dirs 'valid-dirs valid-dirs 'new-queue-entries new-queue-entries))
 	       (setq queue (append new-queue-entries queue))
