@@ -97,6 +97,20 @@
 #   the input by about 08:00. I eventually gave up at 11:50 or so. Started,
 #   distractedly, in Python, around midday. I guess I _did_ use Python, after
 #   all.
+# Day 23: 01:58:36 (Elisp) / ??:??:?? (Python)
+#   05:45:50 / 17:57:09 AoC. Started around 08:47:14 (03:47:14). Had to take a
+#   break and didn't count hours. Time is from Python script, but after
+#   enabling optimisations into the wee hours, got the Elisp to run verbatim in
+#   just over an hour -- likely less time than it took to get the Python done.
+#   Python code is faster and has simpler algorithm learned from Elisp effort.
+# Day 24: Java 01:44:45 / 36:00:00
+#   05:14:45 / >24h AoC. Started maybe 09:00 (04:00:00)? No timestamp. After
+#   08:30. Had a massive wrestly getting this done and probably really used
+#   around 15-20 hours on it. Java was not the issue.
+# Day 25: Bash (duplicate, but meh): 00:40:48 / 00:00:31
+#   18:03:29 / 18:04:01 AoC. Had a brief peek in the morning, decided to look
+#   in GraphViz but save 'til after Day 24. Started proper at 22:22:41
+#   (17:22:41).
 
 Probably a massive grind:
 
@@ -111,5 +125,4 @@ Probably not that bad:
 
 JavaScript
 Raku?
-ELISP (tried and failed) / Clojure / Scheme
-Java
+Clojure / Scheme
