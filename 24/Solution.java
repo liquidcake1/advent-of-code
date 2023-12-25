@@ -72,12 +72,15 @@ public class Solution {
 	}
 	public static void upper_echelon(double in[][]) {
 		int row=0;
+		int irow;
 		for(int col=0; col<in[0].length && row < in.length; col++) {
 			// Find the first row with nonzero col, swap it to row.
 			for(int row_s=row; row_s<in.length; row_s++) {
-				if (in[row_s][col] != 0) {
+				if (Math.abs(in[row_s][col]) > 1.0e-6) {
 					swap_rows(in, row_s, row);
 					break;
+				} else {
+					in[row_s][col] = 0;
 				}
 			}
 			if (in[row][col] == 0) {
@@ -95,10 +98,10 @@ public class Solution {
 			}
 			row += 1;
 		}
-		System.out.println("Alleged upper echelon:");
-		for(row=0; row<in.length; row++) {
-			System.out.println(Arrays.toString(in[row]));
-		}
+		/*System.out.println("Alleged upper echelon:");
+		for(irow=0; irow<in.length; irow++) {
+			System.out.println(Arrays.toString(in[irow]));
+		}*/
 	}
 	public static class NoSolution extends Exception {}
 	public static Double[] solve(double in[][]) throws NoSolution {
@@ -202,15 +205,17 @@ public class Solution {
 		int investigated_points = 5;
 		// cols are stone.pos[0], stone.pos[1], t0, t1, const
 		// rows are resolving point N, coord I
+
 		boolean debug = false;
 		int investigated = 0;
-		for(int svx=-3; svx<0; svx++) {
+		for(int svx=Integer.parseInt(args[1]); svx<=Integer.parseInt(args[2]); svx++) {
+			System.out.println("Considering vx =" + svx);
 			int stone_vel_guess[] = {svx, 0};
 			String skip_reason = null;
 			try {
 				double matrix[][] = gen_matrix(particles, Math.min(10, particles.size()), stone_vel_guess, 1);
 				Double test_result[] = solve(matrix);
-				if (false && Math.abs(Math.round(matrix[0][matrix[0].length-1]) - matrix[0][matrix[0].length-1]) > 0.001) {
+				if (Math.abs(Math.round(matrix[0][matrix[0].length-1]) - matrix[0][matrix[0].length-1]) > 0.001) {
 					skip_reason = "it has non-integer multiple of last var";
 				}
 				if (test_result[0] != null && Math.abs(Math.round(test_result[0]) - test_result[0]) > 0.001) {
@@ -251,12 +256,11 @@ public class Solution {
 				skip_reason = "it is non-amenable excluding Y";
 			}
 			if (skip_reason != null) {
-				System.out.println("Skipping " + svx + " as " + skip_reason);
+				if (debug) System.out.println("Skipping " + svx + " as " + skip_reason);
 				continue;
 			}
 			investigated += 1;
-			for(int svy=1; svy<3; svy++) {
-				System.out.println(svy);
+			for(int svy=Integer.parseInt(args[3]); svy<=Integer.parseInt(args[4]); svy++) {
 				stone_vel_guess[1] = svy;
 				Double[] result = null;
 				try {
@@ -274,6 +278,7 @@ public class Solution {
 					double matrix[][] = gen_matrix(particles, investigated_points, stone_vel_guess, 2);
 					result = solve(matrix);
 				} catch (NoSolution e) {
+					if (debug) System.out.println("Skipped no solution result " + result);
 					continue;
 				}
 				if (result == null) {
