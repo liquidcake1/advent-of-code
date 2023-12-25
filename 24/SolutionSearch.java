@@ -11,7 +11,7 @@ import java.util.Vector;
 import java.util.Set;
 import java.util.HashSet;
 
-public class Solution {
+public class SolutionSearch {
 	public static class Particle {
 		public double[] pos;
 		public double[] velocity;
@@ -73,10 +73,10 @@ public class Solution {
 	public static void upper_echelon(double in[][]) {
 		int row=0;
 		int irow;
-		for(int col=0; col<in[0].length && row < in.length; col++) {
+		for(int col=0; col<in[0].length - 1 && row < in.length; col++) {
 			// Find the first row with nonzero col, swap it to row.
 			for(int row_s=row; row_s<in.length; row_s++) {
-				if (Math.abs(in[row_s][col]) > 1.0e-6) {
+				if (Math.abs(in[row_s][col]) > 1.0e-15) {
 					swap_rows(in, row_s, row);
 					break;
 				} else {
@@ -89,7 +89,7 @@ public class Solution {
 			}
 			// Renormalise
 			multiply_row(in, row, 1.0 / in[row][col]);
-			in[row][col] = 1.0;
+			//in[row][col] = 1.0;
 			// Eliminate from all other rows
 			for(int row_s=0; row_s<in.length; row_s++) {
 				if (row_s == row) continue;
@@ -98,33 +98,32 @@ public class Solution {
 			}
 			row += 1;
 		}
+		/*
 		System.out.println("Alleged upper echelon:");
 		for(irow=0; irow<in.length; irow++) {
 			System.out.println(Arrays.toString(in[irow]));
 		}
+		//*/
 	}
 	public static class NoSolution extends Exception {}
 	public static Double[] solve(double in[][]) throws NoSolution {
 		upper_echelon(in);
 		Double ret[] = new Double[in[0].length - 1];
 		if (in.length > in[0].length - 1) {
-			if (in[in[0].length - 1][in[0].length - 1] != 0) {
+			if (Math.abs(in[in[0].length - 1][in[0].length - 1]) > 0.01) { // The math errors are strong with this one.
 				// Quickie no solution
 				throw new NoSolution();
 			}
 		}
 		int row=0;
-		System.out.println("Initial solution: " + Arrays.toString(ret));
 		for(int col=0; col<ret.length && row<in.length; col++) {
 			if (in[row][col] == 0) {
 				// Multiple solutions.
-				System.out.println("Multiple solutions (zero on diagonal): " + Arrays.toString(in[row]) + " " + col);
 				ret[col] = null;
 			} else {
 				boolean known = true;
 				for (int nextcol=col+1; nextcol<ret.length; nextcol++) {
-					if (in[row][nextcol] != 0) {
-						System.out.println("Multiple solutions (free variables): " + Arrays.toString(in[row]) + " " + col);
+					if (Math.abs(in[row][nextcol]) > 1e-6) {
 						// Multiple solutions. We'll get the free variables later.
 						ret[col] = null;
 						known = false;
@@ -137,7 +136,7 @@ public class Solution {
 				row++;
 			}
 		}
-		if (row < in.length && in[row][ret.length] != 0) {
+		if (row < in.length && Math.abs(in[row][ret.length]) > 0.01) {
 			throw new NoSolution();
 		}
 		return ret;
@@ -201,71 +200,127 @@ public class Solution {
 		// We're assuming that stone.vel[0] is nonzero.
 		// We can solve for t in each equation, then find stone.pos[1:] and stone.vel[1:]
 		// Now we just need to find an integer solution on that line
-		// OK, that didn't work either!
-		//
-		// New track: Renormalise so that hailstone 0 starts at 0,0,0 and has velocity 0,0,0.
-		// We now know that out rock passes through 0,0,0, and its velocity is a (negative) multiple of its start pos.
-		// The rock must hit hailstone 1, too, which means it lies on a plane containing 0,0,0 and the trajectory of hailstone 1.
-		// Plane is defined by N*pos[1] + M*vel[1]
-		// The rock must also hit hailstone 2, and the time must be when hailstone2 hits our plane.
-		// So pos[2] + T*vel[2] = N*pos[1] + M*vel[1]
-		// This is 3 equations, 3 unknowns, and is nicely linear. We'll solve for hailstone 3, too.
-		int investigated_points = 5;
-		// Variables are N2, M2, T2, N3, M3, T3
-		double matrix[][] = new double[6][7];
-		for(int pn=0; pn<2; pn++) {
-			for(int i=0; i<3; i++) {
-				matrix[3*pn+i][3*pn+0] =   particles.get(1).velocity[i]    - particles.get(0).velocity[i];
-				matrix[3*pn+i][3*pn+1] =   particles.get(1).pos[i]         - particles.get(0).pos[i];
-				matrix[3*pn+i][3*pn+2] = -(particles.get(2+pn).velocity[i] - particles.get(0).velocity[i]);
-				matrix[3*pn+i][6]      = -(particles.get(2+pn).pos[i]      - particles.get(0).pos[i]);
+		int investigated_points = 3;
+		// cols are stone.pos[0], stone.pos[1], t0, t1, const
+		// rows are resolving point N, coord I
+
+		boolean debug = false;
+		int investigated = 0;
+		for(int svx=Integer.parseInt(args[1]); svx<=Integer.parseInt(args[2]); svx++) {
+			System.out.println("Considering vx =" + svx);
+			int stone_vel_guess[] = {svx, 0};
+			String skip_reason = null;
+			try {
+				double matrix[][] = gen_matrix(particles, Math.min(10, particles.size()), stone_vel_guess, 1);
+				Double test_result[] = solve(matrix);
+				if (Math.abs(Math.round(matrix[0][matrix[0].length-1]) - matrix[0][matrix[0].length-1]) > 0.001) {
+					skip_reason = "it has non-integer multiple of last var";
+				}
+				if (test_result[0] != null && Math.abs(Math.round(test_result[0]) - test_result[0]) > 0.001) {
+					skip_reason = "it is non-integer excluding Y";
+					continue;
+				} else {
+					System.out.println("Amenable x " + svx + " " + Arrays.toString(test_result));
+				}
+				int zero_count = 0;
+				final Set<Long> set = new HashSet<>();
+				for (int i=0; i<investigated_points; i++) {
+					Double rd = test_result[1 + i];
+					if (rd == null) continue;
+					double r = rd;
+					if (Math.abs(r) < 0.0001) {
+						zero_count += 1;
+					}
+					double xint = r * svx;
+					long rounded = Math.round(xint);
+					if (Math.abs(rounded - xint) > 0.0001) {
+						skip_reason = "it produces a non-integer intersection";
+						break;
+					}
+					if (r < -0.0001) {
+						skip_reason = "it produces an intersection in the past";
+						break;
+					}
+					if (!set.add(rounded)) {
+						skip_reason = "it has two particles with the same intersection" + Arrays.toString(test_result);
+						break;
+					}
+				}
+
+				if (zero_count > 1) {
+					skip_reason = "it requires multiple zeros";
+				}
+			} catch (NoSolution e) {
+				skip_reason = "it is non-amenable excluding Y";
+			}
+			if (skip_reason != null) {
+				if (debug) System.out.println("Skipping " + svx + " as " + skip_reason);
+				continue;
+			}
+			investigated += 1;
+			for(int svy=Integer.parseInt(args[3]); svy<=Integer.parseInt(args[4]); svy++) {
+				if (debug) System.out.println("Considering vy=" + svy);
+				stone_vel_guess[1] = svy;
+				Double[] result = null;
+				try {
+					double matrix[][] = gen_matrix(particles, 2, stone_vel_guess, 2);
+					result = solve(matrix);
+				} catch (NoSolution e) {
+					if (debug) System.out.println("Skipped non-amenable result after 2");
+					continue;
+				}
+				if (result == null) {
+					if (debug) System.out.println("Skipped dead result after 2");
+					continue;
+				}
+				try {
+					double matrix[][] = gen_matrix(particles, investigated_points, stone_vel_guess, 2);
+					result = solve(matrix);
+				} catch (NoSolution e) {
+					if (debug) System.out.println("Skipped no solution result " + result);
+					continue;
+				}
+				if (result == null) {
+					if (debug) System.out.println("Skipped dead result after " + investigated_points);
+					continue;
+				}
+				if (svx == -3 && svy == 1) {
+					System.out.println("Yep solved.");
+				}
+				System.out.println("Solved: " + svx + " " + svy + " " + Arrays.toString(result));
+				// We've got vx and vy. Just need to work out the rest.
 			}
 		}
-		int irow;
-		System.out.println("Raw matrix:");
-		for(irow=0; irow<matrix.length; irow++) {
-			System.out.println(Arrays.toString(matrix[irow]));
+		System.out.println("Investigated: " + investigated);
+		Particle firstpart = particles.get(0);
+		for(Particle p: particles) {
+			if (p != firstpart) continue;
+			if (p == firstpart) continue;
+			if (p.velocity[0] == -3) continue; // Collides everywhere!
+			System.out.println("First particle" + firstpart);
+			System.out.println("Secnd particle" + p);
+			double t0 = (firstpart.pos[0] - 24) / (-3 - firstpart.velocity[0]);
+			double t1 = (p.pos[0] - 24) / (-3 - p.velocity[0]);
+			double stone_vely = (p.pos[1] + t1 * p.velocity[1] - firstpart.pos[1] - t0 * firstpart.velocity[1]) / (t1 - t0);
+			double stone_velz = (p.pos[2] + t1 * p.velocity[2] - firstpart.pos[2] - t0 * firstpart.velocity[2]) / (t1 - t0);
+			double stone_posy = firstpart.pos[1] + t0 * firstpart.velocity[1] - t0 * stone_vely;
+			double stone_posz = firstpart.pos[2] + t0 * firstpart.velocity[2] - t0 * stone_velz;
+			System.out.println(firstpart.pos[0] + t0 * firstpart.velocity[0]);
+			System.out.println(24 + -3 * t0);
+			System.out.println(firstpart.pos[1] + t0 * firstpart.velocity[1]);
+			System.out.println(stone_vely * t0 + stone_posy);
+			System.out.println(firstpart.pos[2] + t0 * firstpart.velocity[2]);
+			System.out.println(stone_velz * t0 + stone_posz);
+			System.out.println(p.pos[0] + t1 * p.velocity[0]);
+			System.out.println(24 * -3 * t1);
+			System.out.println(p.pos[1] + t1 * p.velocity[1]);
+			System.out.println(stone_vely * t1 + stone_posy);
+			System.out.println(p.pos[2] + t1 * p.velocity[2]);
+			System.out.println(stone_velz * t1 + stone_posz);
+			double stone_pos[] = {24, stone_posy, stone_posz};
+			double stone_vel[] = {-3, stone_vely, stone_velz};
+			Particle stone = new Particle(stone_pos, stone_vel);
+			System.out.println(stone);
 		}
-		Double result[] = solve(matrix);
-		System.out.println("Result: " + Arrays.toString(result));
-		double t2 = result[2];
-		double t3 = result[5];
-		// Now work out where we intersect. WRONG
-		/*double proj_intersect_x = (particles.get(2).pos[0] - particles.get(0).pos[0]) + t2 * (particles.get(2).velocity[0] - particles.get(0).velocity[0]);
-		double proj_vx = proj_intersect_x / t2;
-		double real_vx = proj_vx + particles.get(0).velocity[0];
-		double real_intersect_x = particles.get(2).pos[0] + t2 * particles.get(2).velocity[0];
-		double real_x = real_intersect_x - t2 * real_vx;
-		System.out.println("Solution intersects particle 3 at " + t2);
-		System.out.println("Solution projected intersect x is " + proj_intersect_x);
-		System.out.println("Solution projected vx is " + proj_vx);
-		System.out.println("Solution intersect x is " + real_intersect_x);
-		System.out.println("Solution vx is " + real_vx);
-		System.out.println("Solution x is " + real_x);*/
-		double real_x_t2 = particles.get(2).pos[0] + t2 * particles.get(2).velocity[0];
-		double real_x_t3 = particles.get(3).pos[0] + t3 * particles.get(3).velocity[0];
-		long real_vx = Math.round((real_x_t3 - real_x_t2) / (t3 - t2));
-		long real_x = Math.round(real_x_t2 - t2 * real_vx);
-		double real_y_t2 = particles.get(2).pos[1] + t2 * particles.get(2).velocity[1];
-		double real_y_t3 = particles.get(3).pos[1] + t3 * particles.get(3).velocity[1];
-		long real_vy = Math.round((real_y_t3 - real_y_t2) / (t3 - t2));
-		long real_y = Math.round(real_y_t2 - t2 * real_vy);
-		double real_z_t2 = particles.get(2).pos[2] + t2 * particles.get(2).velocity[2];
-		double real_z_t3 = particles.get(3).pos[2] + t3 * particles.get(3).velocity[2];
-		long real_vz = Math.round((real_z_t3 - real_z_t2) / (t3 - t2));
-		long real_z = Math.round(real_z_t2 - t2 * real_vz);
-		System.out.println("Solution x intersect with p2 is " + real_x_t2);
-		System.out.println("Solution x intersect with p3 is " + real_x_t3);
-		System.out.println("Solution vx is " + real_vx);
-		System.out.println("Solution x is " + real_x);
-		System.out.println("Solution y intersect with p2 is " + real_y_t2);
-		System.out.println("Solution y intersect with p3 is " + real_y_t3);
-		System.out.println("Solution vy is " + real_vy);
-		System.out.println("Solution y is " + real_y);
-		System.out.println("Solution z intersect with p2 is " + real_z_t2);
-		System.out.println("Solution z intersect with p3 is " + real_z_t3);
-		System.out.println("Solution vz is " + real_vy);
-		System.out.println("Solution z is " + real_z);
-		System.out.println("Solution is " + (real_x + real_y + real_z));
 	}
 }
