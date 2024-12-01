@@ -1,0 +1,49 @@
+[lc1+scSbSalyx]sz # read val, left into stack A, right into B, count into c
+
+[?z0!=z]sy # Read loop
+
+lyxf # Read input  A is left, B is right
+# Bubble sort
+
+[
+	rdxr
+	1-d0!=L
+]sL      # loop: l
+[lLxsjsj]sl
+
+[
+	lcsC
+	[
+		lC1-dsC
+		LfSd
+		[
+			[r]st #temp swap
+			LfdLdd3R # stack is A0 D0 D0 A0
+			>t   # stack is <-- max min ...
+			SdSd # d has largest
+		]
+		r
+		llx #1 bubble step
+		LdSe
+		[LdSf]lCllx
+	]lc1-llx
+	LfSe
+]ss #Sort: s
+[LaSf]lcllx
+lsx
+[LeSa]lcllx
+[LbSf]lcllx
+lsx
+[LeSb]lcllx
+[LadSgSiLbdShSk]lcllx
+[0r-]st[LgLh-d0>tlT+sT]lcllx
+lTp
+[
+	[lklU+sU]sA
+	[lilk=Alilk!<W]sw
+	[LksJlwx]sW
+	lwx
+	LisJ
+	lUsJ
+]lcllx
+lUp
