@@ -1,7 +1,18 @@
 Deadline: Around 09:00.
 Plan:
-* Struggle with new keyboard.
+* -Struggle with new keyboard.-
 * Use jq.
 * Maybe actually think about the problem??
+* Brute force:
+  * For each . hit, init new visited2.
+  * Continue until edge (no loop) or visited2[x][y][min([3,(dx+1)+(dy+1)*3])]
 
+ 1  0 -> 2 + 3 = 5
+ 0  1 -> 1 + 6 = 7
+-1  0 -> 0 + 3 = 3
+ 0 -1 -> 1 + 0 = 1
 
+2266 too high
+
+2014 too high
+2013 too high
