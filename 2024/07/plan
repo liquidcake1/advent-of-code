@@ -1,0 +1,23 @@
+Deadline: We'll see...
+Plan:
+* -Struggle with new keyboard.- (Not for now.)
+* Use bash. We'll think about style after seeing the problem!
+* Maybe actually think about the problem??
+
+
+
+* Part 2 is solved; we're trying to beat 2m14s
+
+* Recursive:
+real	2m15.346s
+user	2m14.455s
+sys	0m0.505s
+* Non-recuse, unoptimised:
+real	4m29.321s
+user	3m26.860s
+sys	0m59.271s
+* Non-recurse, optimised:
+real	2m32.687s
+user	2m31.908s
+sys	0m0.200s
+
