@@ -3,15 +3,23 @@ Plan:
 * -Struggle with new keyboard.-
 * Use jq.
 * Maybe actually think about the problem??
+* Part 2:
 * Brute force:
   * For each . hit, init new visited2.
-  * Continue until edge (no loop) or visited2[x][y][min([3,(dx+1)+(dy+1)*3])]
+  * Continue until edge (no loop) or visited2[x][y][dirindex]
+* OK, that didn't work. Debug time:
+  * Make a visualiser for loops.
+  * Visually check all 2014 found "loops" to find errors.
 
+GAR, NEGATIVE INDEXES COST ME 3 HOURS!
+
+Dirindex:
  1  0 -> 2 + 3 = 5
  0  1 -> 1 + 6 = 7
 -1  0 -> 0 + 3 = 3
  0 -1 -> 1 + 0 = 1
 
+Fails:
 2266 too high
 
 2014 too high
