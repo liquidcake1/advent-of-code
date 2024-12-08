@@ -1,0 +1,12 @@
+Music: Diverse System - Stream Palette series
+Deadline: We'll see...
+Plan:
+* Struggle with new keyboard?
+* Use Befunge! (Unless not...)
+* Probably have to implement IO?
+* Maybe actually think about the problem??
+
+* Two nested loops over input.
+* Output to left of input any antinodes.
+* Finally, count antinodes in output.
+
