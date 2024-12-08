@@ -9,4 +9,3 @@ Plan:
 * Two nested loops over input.
 * Output to left of input any antinodes.
 * Finally, count antinodes in output.
-
