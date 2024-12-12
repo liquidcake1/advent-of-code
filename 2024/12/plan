@@ -1,0 +1,11 @@
+Music: Diverse System - Stream Palette series
+Deadline: 21:00 (soft)
+Plan:
+* Struggle with new keyboard?
+* Use Elixir.
+* Maybe actually think about the problem??
+
+Flood fill. Either:
+* - Start in top left, explore surroundings, expand regions, merge when adjacent to same letter, stop when full (ie. squares explored = grid size), sum price over fields, or
+* - Fully flood fill each region, walk from top left to bottom right when we hit unexplored regions, or
+* Explore right only, merge adjacent regions, transpose, repeat, done.
