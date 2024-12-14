@@ -1,0 +1,8 @@
+Music: Diverse System - Stream Palette series
+Deadline: 21:00 (soft)
+Plan:
+* Struggle with new keyboard?
+* Use Clojure.
+* Maybe actually think about the problem??
+
+I ran sol2 to completion, but used sol2-faster to actually find the answer. sol2-thinking is way faster and produces a much smaller search set.
