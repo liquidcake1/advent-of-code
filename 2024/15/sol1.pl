@@ -1,10 +1,10 @@
 main:-
     read_file('input', Map, Dirs, RRowI, RColI),
-    write([RRowI, RColI]), nl,
-    write([RRowI, RColI, Map]), nl,
+    %write([RRowI, RColI]), nl,
+    %write([RRowI, RColI, Map]), nl,
     execute_many(Dirs, Map, RRowI, RColI, NewMap, NewRRowI, NewRColI),
-    write([NewRRowI, NewRColI, NewMap]), nl,
-    write(Dirs), nl,
+    %write([NewRRowI, NewRColI, NewMap]), nl,
+    %write(Dirs), nl,
     !,
     gps_sum(NewMap, 0, GPSSum),
     !,
@@ -32,12 +32,28 @@ gps_sum_line([Item|Rest], RowI, ColI, Sum) :-
 execute_many([], Map, RRowI, RColI, Map, RRowI, RColI).
 execute_many([Dir|Rest], Map, RRowI, RColI, NewMap, NewRRowI, NewRColI) :-
     %write(['execute_many', Map, RRowI, RColI, Dir]), nl,
-    execute(Map, RRowI, RColI, Dir, TempMap, TempRRowI, TempRColI),
+    %execute(Map, RRowI, RColI, Dir, TempMap, TempRRowI, TempRColI),
+    execute_many(100, [Dir|Rest], Map, RRowI, RColI, TempMap, TempRRowI, TempRColI, NewRest),
     !,
     %write(['post_execute', TempMap, TempRRowI, TempRColI]), nl,
     length(Rest, L),
-    write([Dir, L]), nl,
-    execute_many(Rest, TempMap, TempRRowI, TempRColI, NewMap, NewRRowI, NewRColI).
+    write([Dir, TempRRowI, TempRColI, L]), nl,
+    execute_many(NewRest, TempMap, TempRRowI, TempRColI, NewMap, NewRRowI, NewRColI),
+    !.
+
+execute_many(_, [], Map, RRowI, RColI, Map, RRowI, RColI, []).
+execute_many(0, Rest, Map, RRowI, RColI, Map, RRowI, RColI, Rest).
+execute_many(N, [Dir|Rest], Map, RRowI, RColI, NewMap, NewRRowI, NewRColI, RRest) :-
+	N > 0,
+    %write(['execute_many', Map, RRowI, RColI, Dir]), nl,
+    execute(Map, RRowI, RColI, Dir, TempMap, TempRRowI, TempRColI),
+    !,
+    %write(['post_execute', TempMap, TempRRowI, TempRColI]), nl,
+    %length(Rest, L),
+    %write([Dir, TempRRowI, TempRColI, L]), nl,
+    NewN is N - 1,
+    execute_many(NewN, Rest, TempMap, TempRRowI, TempRColI, NewMap, NewRRowI, NewRColI, RRest),
+    !.
 
 
 execute(Map, RRowI, RColI, '<', NewMap, RRowI, NewRColI) :-
@@ -128,7 +144,7 @@ push_left(Buffer, [Sym|RobotRow], NewRobotRow, MoveAmount) :-
                 NewRobotRow = ['@'|Rest],
                 push_left(['@'], RobotRow, Rest, MoveAmount)
             ;
-                nth(1, Buffer, '.'),
+		Buffer == ['.'],
                 %write(['@_buffer', Sym, Buffer, RobotRow]), nl,
                 MoveAmount is -1,
                 NewRobotRow = ['@', '.'|Rest],
