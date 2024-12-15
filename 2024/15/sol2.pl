@@ -2,19 +2,16 @@ main(A) :-
     write(A), nl,
     main.
 main:-
-    read_file('input', Map, Dirs, RRowI, RColI),
-    %write([RRowI, RColI]), nl,
-    %write([RRowI, RColI, Map]), nl,
+    read_file('/dev/stdin', Map, Dirs, RRowI, RColI),
+    write([RRowI, RColI]), nl,
+    write([RRowI, RColI, Map]), nl,
     execute_many(Dirs, Map, RRowI, RColI, NewMap, NewRRowI, NewRColI),
-    %write([NewRRowI, NewRColI, NewMap]), nl,
+    write([NewRRowI, NewRColI]), nl,
     %write(Dirs), nl,
     !,
     gps_sum(NewMap, 0, GPSSum),
     !,
     write(['GPSSum', GPSSum]), nl.
-
-test_r([]).
-test_r([H|T]) :- test_r(T), !.
 
 gps_sum([], _, 0).
 gps_sum([Line|Rest], RowI, Sum) :-
@@ -26,39 +23,26 @@ gps_sum([Line|Rest], RowI, Sum) :-
     Sum is SumOfRest + RowSum.
 
 gps_sum_line([], _RowI, _ColI, 0).
-gps_sum_line(['O'|Rest], RowI, ColI, Sum) :-
+gps_sum_line(['['|Rest], RowI, ColI, Sum) :-
     NewColI is ColI + 1,
     gps_sum_line(Rest, RowI, NewColI, SumOfRest),
     Sum is ColI + RowI * 100 + SumOfRest.
 gps_sum_line([Item|Rest], RowI, ColI, Sum) :-
-    Item \== 'O',
+    Item \== '[',
     NewColI is ColI + 1,
     gps_sum_line(Rest, RowI, NewColI, Sum).
 
 execute_many([], Map, RRowI, RColI, Map, RRowI, RColI).
 execute_many([Dir|Rest], Map, RRowI, RColI, NewMap, NewRRowI, NewRColI) :-
-    %write(['execute_many', Map, RRowI, RColI, Dir]), nl,
-    %execute(Map, RRowI, RColI, Dir, TempMap, TempRRowI, TempRColI),
-    execute_many(100, [Dir|Rest], Map, RRowI, RColI, TempMap, TempRRowI, TempRColI, NewRest),
-    !,
-    %write(['post_execute', TempMap, TempRRowI, TempRColI]), nl,
-    length(Rest, L),
-    write([Dir, TempRRowI, TempRColI, L]), nl,
-    execute_many(NewRest, TempMap, TempRRowI, TempRColI, NewMap, NewRRowI, NewRColI),
-    !.
-
-execute_many(_, [], Map, RRowI, RColI, Map, RRowI, RColI, []).
-execute_many(0, Rest, Map, RRowI, RColI, Map, RRowI, RColI, Rest).
-execute_many(N, [Dir|Rest], Map, RRowI, RColI, NewMap, NewRRowI, NewRColI, RRest) :-
-	N > 0,
-    %write(['execute_many', Map, RRowI, RColI, Dir]), nl,
+    write(['execute_many', RRowI, RColI, Dir]), nl,
+    %write_grid(Map),
     execute(Map, RRowI, RColI, Dir, TempMap, TempRRowI, TempRColI),
     !,
-    %write(['post_execute', TempMap, TempRRowI, TempRColI]), nl,
-    %length(Rest, L),
-    %write([Dir, TempRRowI, TempRColI, L]), nl,
-    NewN is N - 1,
-    execute_many(NewN, Rest, TempMap, TempRRowI, TempRColI, NewMap, NewRRowI, NewRColI, RRest),
+    write(['post_execute', TempRRowI, TempRColI]), nl,
+    %write_grid(TempMap),
+    length(Rest, L),
+    write([Dir, TempRRowI, TempRColI, L]), nl,
+    execute_many(Rest, TempMap, TempRRowI, TempRColI, NewMap, NewRRowI, NewRColI),
     !.
 
 
@@ -67,13 +51,90 @@ execute(Map, RRowI, RColI, '<', NewMap, RRowI, NewRColI) :-
 execute(Map, RRowI, RColI, '>', NewMap, RRowI, NewRColI) :-
     executeh(Map, RRowI, RColI, '>', NewMap, NewRColI).
 execute(Map, RRowI, RColI, '^', NewMap, NewRRowI, RColI) :-
-    transpose(Map, TMap),
-    executeh(TMap, RColI, RRowI, '<', TNewMap, NewRRowI),
-    transpose(TNewMap, NewMap).
+    push_up(Map, RRowI, NewMap, NewRRowI).
 execute(Map, RRowI, RColI, 'v', NewMap, NewRRowI, RColI) :-
-    transpose(Map, TMap),
-    executeh(TMap, RColI, RRowI, '>', TNewMap, NewRRowI),
-    transpose(TNewMap, NewMap).
+    push_down(Map, RRowI, NewMap, MoveAmount),
+    NewRRowI is RRowI + MoveAmount.
+
+push_up(Map, RRowI, NewMap, NewRRowI) :-
+    reverse(Map, RMap),
+    length(Map, L),
+    RRRowI is L - RRowI + 1,
+    push_down(RMap, RRRowI, RNewMap, MoveAmount),
+    NewRRowI is RRowI - MoveAmount,
+    reverse(RNewMap, NewMap).
+
+write_grid([H|Map]) :-
+    write(H), nl,
+    write_grid(Map).
+write_grid([]).
+
+push_down([Row|Map], 1, [NewRow|NewMap], MoveAmount) :-
+    %write(['push_down_mask row', Row, NewRow]), nl,
+    robot_row_to_mask(Row, NewRow, Mask),
+    %write(['push_down_mask mask', Mask]), nl,
+    push_down_mask(Map, Mask, NewMap),
+    %write(['push_down_mask new_map', NewMap]), nl,
+    MoveAmount is 1,
+    !.
+push_down(Map, 1, Map, 0).
+push_down([Row|Map], RRowI, [Row|NewMap], MoveAmount) :-
+    RRowI \== 1,
+    NextRRowI is RRowI - 1,
+    push_down(Map, NextRRowI, NewMap, MoveAmount).
+
+push_down_mask([Row|Map], Mask, [NewRow|NewMap]) :-
+    %write(['push_down   mask', Mask]), nl,
+    %write(['push_down   row ', Row]), nl,
+    row_to_mask(Row, Mask, NewRow, NewMask),
+    %write(['pushed_down row ', NewRow]), nl,
+    %write(['pushed_down mask', NewMask]), nl,
+    push_down_mask(Map, NewMask, NewMap).
+push_down_mask([], _, []).
+
+
+robot_row_to_mask(['@'|RRest], ['.'|NewRow], ['@'|NewMask]) :-
+    robot_row_to_mask(RRest, NewRow, NewMask),
+    !.
+robot_row_to_mask([Sym|RRest], [Sym|NewRow], ['.'|NewMask]) :-
+    Sym \== '@',
+    robot_row_to_mask(RRest, NewRow, NewMask),
+    !.
+robot_row_to_mask([], [], []).
+
+row_to_mask(['.', '.'|RRest], ['[', ']'|MRest], ['[', ']'|NewRow], ['.', '.'|NewMask]) :-
+    !,
+    row_to_mask(RRest, MRest, NewRow, NewMask).
+row_to_mask(['[', ']'|RRest], ['.', '.'|MRest], ['[', ']'|NewRow], ['.', '.'|NewMask]) :-
+    !,
+    row_to_mask(RRest, MRest, NewRow, NewMask).
+row_to_mask(['.', '['|RRest], ['[', ']'|MRest], ['[', ']'|NewRow], ['.', '['|NewMask]) :-
+    !,
+    row_to_mask(RRest, MRest, NewRow, NewMask).
+row_to_mask(['[', ']'|RRest], [S1, S2|MRest], [S1, S2|NewRow], ['[', ']'|NewMask]) :-
+    !,
+    row_to_mask(RRest, MRest, NewRow, NewMask).
+row_to_mask(['.'|RRest], [']'|MRest], [']'|NewRow], ['.'|NewMask]) :-
+    !,
+    row_to_mask(RRest, MRest, NewRow, NewMask).
+row_to_mask([']'|RRest], [Sym|MRest], [Sym|NewRow], [']'|NewMask]) :-
+    row_to_mask(RRest, MRest, NewRow, NewMask).
+row_to_mask(['.'|RRest], ['@'|MRest], ['@'|NewRow], ['.'|NewMask]) :-
+    !,
+    row_to_mask(RRest, MRest, NewRow, NewMask).
+row_to_mask([Sym|RRest], ['.'|MRest], [Sym|NewRow], ['.'|NewMask]) :-
+    Sym \== ']',
+    !,
+    row_to_mask(RRest, MRest, NewRow, NewMask).
+row_to_mask(['#'|_RRest], [Sym|_MRest], _, _) :-
+    Sym \== '.',
+    write(['row_to_mask hash case']), nl,
+    fail.
+row_to_mask([], [], [], []).
+row_to_mask(Rest, MRest, NewRow, NewMask) :-
+    write(['row_to_mask fail',Rest, MRest, NewRow, NewMask]), nl,
+    fail.
+
 
 executeh([Row|Map], 1, RColI, Dir, [NewRow|NewMap], NewRColI) :-
     execute_on_row(Row, Dir, NewRow, MoveAmount),
@@ -89,23 +150,6 @@ execute_on_row(Row, '<', NewRow, MoveAmount) :-
     push_left([], Row, NewRow, MoveAmount).
 execute_on_row(Row, '>', NewRow, MoveAmount) :-
     push_right([], Row, NewRow, MoveAmount).
-
-transpose([X], XTransposed) :-
-    wrapped(X, XTransposed).
-transpose([X|Rest], TransposeWithX) :-
-    Rest \== [],
-    % X is a list.
-    % RHS must have elts of X at the start, in turn.
-    every_start(X, TransposeWithoutX, TransposeWithX),
-    transpose(Rest, TransposeWithoutX).
-
-wrapped([], []).
-wrapped([X|Rest], [[X]|WRest]) :- wrapped(Rest, WRest).
-
-every_start([X|XRest], [RHS|RHSRest], RHSWithX) :-
-    RHSWithX = [[X|RHS]|RHSAfterX],
-    every_start(XRest, RHSRest, RHSAfterX).
-every_start([], [], []).
 
 push_right(Buffer, RobotRow, NewRobotRow, MoveAmount) :-
     reverse(RevRobotRow, RobotRow),
@@ -137,8 +181,13 @@ push_left(Buffer, [Sym|RobotRow], NewRobotRow, MoveAmount) :-
                 push_left([], RobotRow, Rest, MoveAmount)
             )
         ;
-            Sym == 'O' ->
-            NewRobotRow = ['O'|Rest],
+            Sym == '[' ->
+            NewRobotRow = [Sym|Rest],
+            %write(['O', Sym, Buffer, RobotRow]), nl,
+            push_left(Buffer, RobotRow, Rest, MoveAmount)
+        ;
+            Sym == ']' ->
+            NewRobotRow = [Sym|Rest],
             %write(['O', Sym, Buffer, RobotRow]), nl,
             push_left(Buffer, RobotRow, Rest, MoveAmount)
         ;
@@ -150,7 +199,7 @@ push_left(Buffer, [Sym|RobotRow], NewRobotRow, MoveAmount) :-
                 NewRobotRow = ['@'|Rest],
                 push_left(['@'], RobotRow, Rest, MoveAmount)
             ;
-		Buffer == ['.'],
+                Buffer == ['.'],
                 %write(['@_buffer', Sym, Buffer, RobotRow]), nl,
                 MoveAmount is -1,
                 NewRobotRow = ['@', '.'|Rest],
@@ -181,14 +230,18 @@ read_map_line(Stream, Char, Chars, RRowI, RowI, RColI, ColI) :-
     (   Char == '\n' ->
         Chars = []
     ;   Char == '@' ->
-        Chars = [Char| Rest],
+        Chars = ['@', '.'| Rest],
         RRowI is RowI,
         RColI is ColI,
         get_char(Stream, Next),
-        read_map_line(Stream, Next, Rest, RRowI, RowI, RColI, ColI + 1)
-    ;   Chars = [Char| Rest],
+        read_map_line(Stream, Next, Rest, RRowI, RowI, RColI, ColI + 2)
+    ;   Char == 'O' ->
+        Chars = ['[', ']'| Rest],
         get_char(Stream, Next),
-        read_map_line(Stream, Next, Rest, RRowI, RowI, RColI, ColI + 1)
+        read_map_line(Stream, Next, Rest, RRowI, RowI, RColI, ColI + 2)
+    ;   Chars = [Char, Char| Rest],
+        get_char(Stream, Next),
+        read_map_line(Stream, Next, Rest, RRowI, RowI, RColI, ColI + 2)
     ).
 
 read_dirs(Stream, Char, Chars) :-

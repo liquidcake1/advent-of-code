@@ -1,1 +1,1 @@
-gprolog --consult-file "$1" --query-goal 'main' < "$2" | tail -n +5 
+swipl -f "$1" -g main -g exit < "$2"
