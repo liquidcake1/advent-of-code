@@ -1,0 +1,11 @@
+.*.swp
+input
+input.txt
+sample
+sample.txt
+sample*
+*.o
+a.out
+sol1
+sol2
+out*
