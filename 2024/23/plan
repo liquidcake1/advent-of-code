@@ -1,7 +1,17 @@
-Music: None today!
-Deadline: 13:00?
+Music: Diverse System - Stream Palette series
+Deadline/target: 16:00?
 I'm doing each day in a different programming language. https://github.com/liquidcake1/advent-of-code
 Plan:
 * Improve with new keyboard (Kinesis Advantage 360).
-* All Your Guarantees: Zig, today
+* All Your Guarantees: Zig, today (suggested by Rokannon)
 * Maybe actually think about the problem??
+
+Technique:
+0. Remove one element from the graph.
+1. Start with target network size n=7.
+2. Remove anything with fewer than n-1 connections from the graph.
+3. Recompute the connections.
+4. If no connections were removed, output the graph and go to 6. Hope: Graph is of size n.
+5. If there are more than n things, go to 2.
+6. Reduce n and repeat unless n < 4.
+7. Go to 0.
