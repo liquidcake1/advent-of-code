@@ -1,0 +1,2 @@
+#!/bin/bash
+ssh stream-vm "(cd zig-day-23; ../zig-linux-x86_64-0.14.0-dev.2557+f06ca14cb/zig $*)"
