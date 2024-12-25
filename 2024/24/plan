@@ -5,3 +5,16 @@ Plan:
 * Improve with new keyboard (Kinesis Advantage 360).
 * Functional mode: Haskell on this one.
 * Maybe actually think about the problem??
+
+Half-adder:
+
+Stage 0=0a?:
+x0 XOR y0 -> output_stage0=z0
+x0 AND y0 -> carry_stage0a=carry_stage0
+Stage 1a:
+x1 XOR y1 -> output_stage1a
+x1 AND y1 -> carry_stage1a
+Stage 1b:
+carry_stage0 XOR output_stage1a -> output_stage1=z1
+carry_stage0 AND output_stage1a -> carry_stage1b
+carry_stage1a OR carry_stage1b -> carry_stage1
