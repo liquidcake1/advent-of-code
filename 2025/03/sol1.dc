@@ -1,0 +1,156 @@
+# cat: [n10P?1z>a]Sa?lax
+# a: pop N, 0, decompose N, push into stack 'n', push 0, push length
+[10 ~ Sn d 0 r >a r1+r] sa
+
+# r: pops length n, stack reader R, stack writer W, reverses R into W. End state has 3 junk elts.
+[
+  d 0 r >R
+] sr
+# R: in: n, R, W. Reverses R into W. n >= 1
+[
+  0 3-R # R W n
+  dx    # Elt R W n
+  3 R   # W Elt R n
+  d     # W W Elt R n
+  0 3-R # W Elt W R n
+  x     # W R n
+  r     # R W n
+  3 R   # n R W
+  1 -   # n-1 R W
+  lr x  # loop via r
+] sR
+
+# FOLD (and reverse) f: pops length n, acc A, Fold F, stack reader R, stack writer W, finds the max of R, uses temp 'z', fills W
+# F should pop A, N
+[
+  #[In f]P10P f [end]P10P
+  d 0 r >F
+] sf
+# F: in: n, A, F, R, W. Reverses R into W. n >= 1
+[
+  #[In F]P10P f [end]P10P
+  4R    # R n A F W
+  dxd   # Elt Elt R n A F W
+  7R    # W Elt Elt R n A F
+  d     # W W Elt Elt R n A F
+  0 3-R # W Elt W Elt R n A F
+  x     # W Elt R n A F
+  0 6-R # Elt R n A F W
+  # Need: F' A Elt ...
+  5R    # F Elt R n A W
+  d     # F F Elt R n A W
+  0 6-R # F Elt R n A F W
+  5R    # A F Elt R n F W
+  r     # F A Elt R n F W
+  x     # A' R n F W
+  r     # R A' n F W
+  0 4-R # A' n F R W
+  r     # n A' F R W
+  1 -   # n-1 A' F R W
+  lf x  # loop via r
+] sF
+
+# ACCUMULATE (and reverse) g: pops length n, acc A, Fold F, stack reader R, uses temp 'z'
+# F should pop A, N
+[
+  #[In g]P10P f [end]P10P
+  d 0 r >G
+] sg
+# G: in: n, A, F, R. Reverses R into W. n >= 1
+[
+  #[In G]P10P f [end]P10P
+  4R    # R n A F
+  dx    # Elt R n A F
+  # Need: F' A Elt
+  5R    # F Elt R n A
+  d     # F F Elt R n A
+  0 6-R # F Elt R n A F
+  0 6-R # Elt R n A F F
+  4R    # A Elt R n F F
+  6R    # F A Elt R n F
+  x     # A' R n F
+  4R 4R # n F A' R
+  3R    # A' n F R
+  r     # n A' F R
+  1 -   # n-1 A' F R W
+  lg x  # loop via r
+] sG
+
+# MAX M: pops a, b; pushes max
+[
+  d 3R d 0 3- R # a b b a
+  [r]sz
+  >z
+  sz
+] sM
+
+[
+	# Read a number, decompose it.
+	0 ?
+	[3Q]sq
+	d 0=q
+	la x sz
+	# Stack n is now digits of number, high first. Stack is length.
+	# Reverses n -> m
+	d [Sm] r [Ln] r lr x sz sz sz
+	# Stack n empty, Stack m digits, small first. Main stack is length.
+	# Find max
+	LmSn d [Sn] [Lm] lM 0 5R 1- lf x sz rsz rsz rsz
+	# Stack n has digits, stack is max, length
+	# If (elt == target and must_remove) remove elt, decr must_remove
+	[
+		# A Elt R n F
+		# Delete max: sz0 1-rdSmr
+		# Want: Find max of remainder.
+		# Want: n A F' R' W'
+		#[In accfun]P10P
+		4R d 0 5-R # n A Elt R n F
+		[So]
+		[Ln]
+		lM
+		0
+		5R
+		1-
+		#[About to remax]P10P f [end]P10P
+		lf x sz rsz rsz rsz
+		#[After remax]P10P f [end]P10P
+		# Have: max' A Elt R n F
+		r 10 * +
+		# Have: answer Elt R n F
+		4R d 0 5-R # n answer Elt R n F
+		[Sn] r [Lo] r 1- lr
+		#[About to reverse]P10P f [end]P10P
+		x sz sz sz
+		#[Post reverse]P10P f [end]P10P
+		# Have: A' Elt R n F
+	]sy  # y: set head to -1, push & keep second
+	rd3Rr # M L -> LM -> LLM -> MLL -> LML
+	[Ln]  # R n A
+	[
+		# A Elt R n F
+		#[In acc: acc, n]P10P f [end]P10P
+		d
+		#[In acc: acc, acc, n]P10P f [end]P10P
+		3R 
+		#[In acc: n, acc, acc]P10P f [end]P10P
+		d
+		#[In acc: n, n, acc, acc]P10P f [end]P10P
+		0 4- R
+		#[In acc: n, acc, acc, n]P10P f [end]P10P
+		=y
+		#[In acc: acc, n]P10P f [end]P10P
+		r sz
+	]     # Run x if must_remove
+				# F R n A
+	4R 4R # n A F R
+	lg x sz rsz rsz rsz
+	#[End]P10P f [end]P10P
+]sp
+0st
+[lpx][
+	#[In loop]P10P f [end]P10P
+	rdx
+  lt+dstn10P
+	#[Mid loop]P10P f [end]P10P
+	rdx
+]dx
