@@ -1,0 +1,138 @@
+diff --git a/src/vm.rs b/src/vm.rs
+index 9dc2a6b..a8bacdc 100644
+--- a/src/vm.rs
++++ b/src/vm.rs
+@@ -15,6 +15,8 @@ use vectormath::{
+     Lerp,
+     Point2,
+ };
++use std::fs;
++
+ pub use persist::{write_persist, read_persist};
+ 
+ const VM_INIT_USER_COUNT: usize = 128;
+@@ -174,7 +176,7 @@ impl<'de> de::Deserialize<'de> for VMProtections {
+ }
+ 
+ pub fn default_module_selects() -> [u16; 7] {
+-    [0x1000, 0x1001, 0, 0x4000, 0x4040, 0x4050, 0x4051]
++    [0x1000, 0x1001, 0x9000, 0x4000, 0x4040, 0x4050, 0x4051]
+ }
+ pub fn default_except_register() -> VMRegister {
+     VMRegister{x:MEM_PRIV_IO_START + 0x08, y:0, z:0, w:0}
+@@ -1093,6 +1095,56 @@ impl Serialize for MemoryBlock {
+ }
+ 
+ 
++#[derive(Debug, Default, Serialize, Deserialize, PartialEq)]
++#[serde(default)]
++pub struct InputModule {
++    pub offset: usize,
++    pub data_selector: u16,
++}
++impl Display for InputModule {
++    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
++        write!(f, "InM[{:8x}]", self.offset)
++    }
++}
++impl ModuleBank for InputModule {
++    fn read_bank(&mut self, _: &mut Cycle, offset: u8) -> u16 {
++        match offset {
++            0 => {
++                match fs::read("sample") {
++                    Ok(contents) => {
++                        if self.offset < contents.len() {
++                            let out = contents[{let tmp = self.offset; self.offset += 1; tmp}];
++                            eprint!("Sending {}\n", out);
++                            out.into()
++                        } else {
++                            eprint!("EOF!!!!");
++                            0
++                        }
++                    }
++                    Err(_) => { panic!("File not found") }
++                }
++            }
++            _ => 0
++        }
++    }
++    fn write_bank(&mut self, _: &mut Cycle, offset: u8, value: u16) {
++        match offset {
++            1 => {
++                self.offset = value.into()
++            }
++            2 => {
++                eprint!("Selecting output bank {}\n", value);
++                self.data_selector = value.into();
++                self.offset = 0
++            }
++            3 => {
++                eprint!("Output: {}\n", value);
++            }
++            _ => {}
++        }
++    }
++}
++
+ #[derive(Debug, Default, Serialize, Deserialize, PartialEq)]
+ #[serde(default)]
+ pub struct FlightModule {
+@@ -1559,6 +1611,7 @@ pub struct VMUser {
+     #[serde(skip)]
+     pub requested_fields: u32,
+     pub mem_blocks: Vec<MemoryBlock>,
++    pub input: InputModule,
+ }
+ fn default_thread0() -> Box<WaveProc> {
+     Box::new(WaveProc::new(0))
+@@ -1581,6 +1634,7 @@ impl Default for VMUser {
+             user_name: String::default(),
+             user_login: String::default(),
+             mem_blocks: Vec::new(),
++            input: InputModule::default(),
+         }
+     }
+ }
+@@ -1612,6 +1666,7 @@ impl VMUser {
+             IOModule::Module(0x1002) => &mut self.agent.con_store,
+             IOModule::Module(0x4000) => &mut self.ship.flight,
+             IOModule::Module(0x4050) => &mut self.ship.nav,
++            IOModule::Module(0x9000) => &mut self.input,
+             IOModule::Module(_) => return None,
+         }, offset))
+     }
+diff --git a/src/wave2.ts b/src/wave2.ts
+index 47e58f1..8ceb999 100644
+--- a/src/wave2.ts
++++ b/src/wave2.ts
+@@ -114,7 +114,7 @@ interface ShipInfo {
+ 
+ class WaveSys {
+ 	connect() {
+-		let ws = this.ws = new WebSocket(CONNECT_TO);
++		let ws = this.ws = new WebSocket("ws://127.0.0.1:23192/");
+ 		ws.binaryType = 'arraybuffer';
+ 		ws.addEventListener("open", ()=>this.onopen());
+ 		ws.addEventListener("close", ()=>this.onclose());
+diff --git a/src/wavenet.rs b/src/wavenet.rs
+index bae3ddb..251d43f 100644
+--- a/src/wavenet.rs
++++ b/src/wavenet.rs
+@@ -360,7 +360,7 @@ async fn simulation(settings: &'static ServerState,
+     mut sim_rx: mpsc::Receiver<ClientChannelMessage>,
+     mut sim_ext_rx: mpsc::Receiver<ExtClientNew>,
+     ) {
+-    let mut interval = time::interval(time::Duration::from_millis(18));
++    let mut interval = time::interval(time::Duration::from_millis(1));   // Here (more ticks)
+     let mut cull_interval = time::interval(time::Duration::from_millis(1000));
+     let mut clients: Vec<ClientSend> = vec![];
+     let mut ext_clients: Vec<(String, mpsc::Sender<ClientData>, oneshot::Sender<u64>)> = vec![];
+@@ -459,7 +459,7 @@ async fn simulation(settings: &'static ServerState,
+                 }
+             }
+             SimulationSelect::Tick => {
+-                sim_vm.tick(168);
++                sim_vm.tick(10000);  // Or here (more cycles per tick)
+                 let msg = sim_vm.delta_encode();
+                 let mut client_index = 0;
+                 while client_index < clients.len() {
