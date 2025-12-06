@@ -1,0 +1,78 @@
+# x    y    z    w
+0000 0020 0030 000a # C0 -- constants: x 0, y ASCII space, z ASCII 0, w ASCII nl
+0360 0362 0363 0000 # C1 -- io addresses: x is read, y is select, z is write 
+0363 0000 0000 0000 # C2
+0362 0000 0000 0000 # C3
+0000 0000 0000 0000 # C4
+0000 0000 0000 0000 # C5
+0000 0000 0000 0000 # C6
+0000 0000 0000 0000 # C7
+0000 0000 0000 0000 # R0   -- input goes into R0.x
+0000 0000 0000 0000 # R1   -- input accumulator
+0000 0000 0000 0000 # R2
+0000 0000 0000 0000 # R3
+0000 0000 0000 0000 # R4
+0000 0000 0000 0000 # R5
+0000 0000 0000 0000 # R6 -- copies of C
+0000 0000 0000 0000 # Ri (overwritten by restart)
+
+! code
+# dst src extra opcode
+E141 # Grab C1.Y (reset offset) into R6.x
+0EC7 # Write 0 (C0) to offset in input module
+#E181 # Grab C1.Z (write to from input) into R6.x
+#8EC7 # Write R0 into input module
+
+# -- Fake a 0 from input
+8004 # Copy C0 to R0
+8AA5 # Swizzle R0.z into all fields
+
+F905 # PUSH Ri
+FE05 # Reset Ri (so that we jump here) Return via Ri.y
+
+# -- Combine input into R2
+A081 # R2.x is ASCII "0"
+8A29 # R0.x is now digit val
+A0C1 # R2.x is 10
+9A2D # Multiply R1 by R2
+9809 # Add R0 to R1
+
+886C # Clear R0 via Xor
+E101 # Grab C1.X (read from input) into R6.x
+8EC6 # Read from input module into R0.x
+8005 # R0.x swizzle to other fields (R0 all input)
+B804 # MOV R3, R0 (save for later)
+AA6C # Clear R2 via Xor
+A041 # R2.x is ASCII " "
+A005 # R2.x swizzle to other fields (R2 all space)
+# Target: Get return or PC into R2.x, copy R2.x to Ri.x (PC)
+#   Sub-target: Get Return into R2.x if not space
+#               Get Next into R4.x if space
+#               Add R4 to R2
+#               Set PC to R2.x
+8A79 # R0 <- R0 neq R2. R0 is 0xffff if input is " "
+8F8C # R0 <- R0 & Ri, R0.y is now return address if input is not space. Woo!!!
+8555 # R0.y swizzle to other fields (R0 all return address)
+C804 # R4 <- R0
+8B04 # R0 <- R3
+8A39 # R0 <- R0 eq R2. R0 is 0xffff if input is not " "
+DF04 # R5 <- Ri ****
+D005 # R5.* = PC @*
+D009 # R5.w = PC @* + 10
+DFF5 # R5.* = R5.x (PC @* + 10)
+8D8C # R0 <- R0 & R5, R0.x is now PC @* +10 if input is space.
+C8EC # R4 <- R0 | R4, R4.x is now PC @* +10 or return addr
+8B04 # R0 <- R3
+FCE4 # PC <- R4.x
+
+# Pad 3 instructions to catch jump
+E181 # Grab C1.Z (write to from input) into R6.x
+E181 # Grab C1.Z (write to from input) into R6.x
+E181 # Grab C1.Z (write to from input) into R6.x
+
+# WRITE A TERMINATE
+E181 # Grab C1.Z (write to from input) into R6.x
+9EC7 # Write R1 into input module
+
+E181 # Grab C1.Z (write to from input) into R6.x
+0EC7 # Write C0 into input module
