@@ -1,0 +1,40 @@
+#lang rhombus
+
+import:
+  rhombus/cmdline
+
+
+def config:
+  cmdline.parse:
+    cmdline.flag "--file" filename
+
+fun explore(node, graph, cache):
+  if cache.contains(node)
+  | values(cache[node], cache)
+  | let (new, newcache) = for values(sum=0, cache=cache) (parent in graph.get(node, [])):
+      let (ret, newcache) = explore(parent, graph, cache)
+      values(ret + sum, newcache)
+    values(new, newcache.set(node, new))
+
+fun explore_path(path, graph):
+  for values(prod=1):
+    each:
+      left in path
+      right in path.drop(1)
+    let (ans, cache) = explore(left, graph, Map{right: 1})
+    prod * ans
+
+module main:
+  let foo = @(config.get(#'file))
+  let file = Port.Input.open_file(foo)
+  let graph = for values(graph = Map.empty) (line in file.lines()):
+    let [input, outputs_str] = line.split(": ")
+    let outputs = outputs_str.split(" ")
+    for values(graph = graph) (output in outputs):
+      if (graph.contains(output))
+      | graph.set(output, graph[output] ++ [input])
+      | graph.set(output, [input])
+  let (ans1, cache) = explore("out", graph, Map{"you": 1})
+  let ans2 = explore_path(["out", "dac", "fft", "svr"], graph)
+    + explore_path(["out", "fft", "dac", "svr"], graph)
+  values(ans1, ans2)

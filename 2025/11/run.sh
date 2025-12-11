@@ -1,3 +1,3 @@
 #!/bin/bash
 
-python3 "$1" < "$2"
+racket -I rhombus "$1" --file "$2"
