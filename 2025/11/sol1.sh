@@ -1,0 +1,1 @@
+cp input inputtmp; for i in {0..50}; do sed -i -E 's/(.*): ([^ ]*)/\1 \2\n\1:/' inputtmp; done; < inputtmp sed -E '/.*:$/d;s/(.*) (.*)/\1 \1\2\n\1\2 \2/' | tsort | (echo 'you = 1'; sed -E '/^...$/d;s/(...)(...)/\2 = \2 + \1/'; echo out) | bc
